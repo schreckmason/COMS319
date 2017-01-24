@@ -9,55 +9,87 @@ import javax.management.RuntimeErrorException;
 
 import java.io.*;
 
-public class Server implements Runnable
+public class Server
 {
 	
+	private ArrayList<ClientHandler> clients;
 	private ServerSocket serverSocket = null;
-	private Thread mainThread = null;
-	private File file = new File("chat.txt");
-	private PrintWriter writer;
+	private Thread clientAccepter = null;
+	
+	private PrintWriter out;
+	
+	private File logFile = new File("chat.txt");
+	private int msgCnt;
+	
 	private ServerGUI frame;
-	private Thread guiMessageThread;
+	
+//	private Thread guiMessageThread;
 
 	public Server(int port)
 	{
-		//TODO Binding and starting server
 		try
 		{
+			// Making socket
 			System.out.println("Binding to port " + port + ", please wait  ...");
 			serverSocket = new ServerSocket(port);
 			System.out.println("Server started: " + serverSocket);
-			start();
+			
+			// GUI starting
+			frame = new ServerGUI();
+			frame.setVisible(true);
+			
+			//Starting Client Accepter Thread
+			new Thread(new Runnable(){
+
+				@Override
+				public void run() {
+					while (true) {
+						Socket clientSocket = null;
+						try {
+							
+							// WAIT FOR CLIENT TO TRY TO CONNECT TO SERVER
+							clientSocket = serverSocket.accept();
+
+							// SPAWN A THREAD TO HANDLE CLIENT REQUEST
+							// TODO: Put in a thread since this constructor could wait.
+							ClientHandler clientHandler = new ClientHandler(clientSocket);
+							Thread chThread = new Thread(clientHandler);
+							clients.add(clientHandler);
+							chThread.start();
+							
+						} catch (IOException e) {
+							System.out.println("Accept failed: 4444");
+							System.exit(-1);
+						}					
+					}
+				}	
+			}).start();
 		} catch (IOException ioe)
 		{
 			System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
 		}
 	}
 
-	public void run()
-	{
-		//TODO wait for a client or show error
-		
-	}
+//	public void run()
+//	{
+//		//TODO wait for a client or show error
+//		
+//	}
+//	
+//	public void stop()
+//	{
+//		//TODO
+//		
+//	}
 
-	public void start()
+	private int deleteClient(String clientToDelete)
 	{
-		frame = new ServerGUI();
-		frame.setVisible(true);
-		//TODO launch a thread to read for new messages by the server
-	
-	}
-	
-	public void stop()
-	{
-		//TODO
-		
-	}
-
-	private int findClient(int ID)
-	{
-		//TODO Find Client
-		
+		//TODO: Check if I need to use an iterator instead
+		for(ClientHandler ch:clients){
+			if(ch.name == clientToDelete){
+				clients.remove(ch);
+			}
+		}
 
 		return -1;
 	}
@@ -76,10 +108,27 @@ public class Server implements Runnable
 		
 	}
 
-	private void addThread(Socket socket)
-	{
-		//TODO add new client
-		
+//	private void addThread(Socket socket)
+//	{
+//		//TODO add new client
+//		
+//	}
+	
+	//logs message to the log file with the following format: Author # message
+	//needs to use class variables of logFile and msgCnt
+	public void logMessage(String message, String author){
+		try {
+			// Open log file, append, and close
+			PrintWriter logWriter = new PrintWriter(new FileWriter(logFile, true));
+			logWriter.println(author + (msgCnt++) + message);
+			logWriter.close();
+		} catch (IOException e) {
+			System.out.println("Encountered problem logging to chat.txt");
+		}
+	}
+	
+	public void logImgMessage(File image, String author){
+		logMessage(image.getName(), author);
 	}
 
 	public static void main(String args[])
@@ -87,25 +136,15 @@ public class Server implements Runnable
 		Server server = null;
 		server = new Server(1222);
 	}
-	
-	//logs message to the log file with the following format: Author # message
-	//needs to use class variables of logFile and msgCnt
-	public void logMessage(String message, String author){
-		
-	}
-	
-	public void logImgMessage(File image, String author){
-		logMessage(image.getName(), author);
-	}
 }
 
-class ListClientHandler implements Runnable {
+class ClientHandler implements Runnable {
 	Socket s; // this is socket on the server side that connects to the CLIENT
-	String name;
-	Scanner in;
-	PrintWriter out;
+	public String name;
+	private Scanner in;
+	private PrintWriter out;
 	
-	ListClientHandler(Socket s, int n) {
+	ClientHandler(Socket s) {
 		this.s = s;
 		name = "";
 		try {
@@ -114,12 +153,10 @@ class ListClientHandler implements Runnable {
 			
 			//wait for name message from client
 			while(name == ""){
-				if(in.next() == "name"){
-					name = in.nextLine();
-					if(name.contains(" ")){
-						throw new Exception("Names cannot contain spaces.");
-					};
-				}
+				name = in.nextLine();
+				if(name.contains(" ")){
+					System.out.println("Error: Name should not contain spaces.");
+				};
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -127,13 +164,11 @@ class ListClientHandler implements Runnable {
 		} 
 	}
 
-	// This is the client handling code
-	// This keeps running handling client requests 
-	// after initially sending some stuff to the client
 	public void run() { 
+		
 	}
-	
+	 
 	void handleRequest(String s) {
-		System.out.println("server side: " + s);
+		
 	}
 }
