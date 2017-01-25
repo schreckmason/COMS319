@@ -1,0 +1,100 @@
+
+
+import java.net.*;
+import java.util.Scanner;
+
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+
+import java.awt.EventQueue;
+import java.io.*;
+
+public class Client implements Runnable
+{
+	private Socket socket = null;
+	private Thread thread = null;
+	private DataOutputStream streamOut = null;
+	private String username;
+	private ChatGUI frame;
+
+	public Client(String ipAddr, String username, int serverPort)
+	{
+		this.username = username;
+		
+		try
+		{
+			socket = new Socket(ipAddr, serverPort);
+			start();run();
+		} catch (UnknownHostException h)
+		{
+			JOptionPane.showMessageDialog(new JFrame(), "Unknown Host " + h.getMessage());
+			System.exit(1);
+		} catch (IOException e)
+		{
+			JOptionPane.showMessageDialog(new JFrame(), "IO exception: " + e.getMessage());
+			System.exit(1);
+		}
+	}
+
+	public void run()
+	{
+		//TODO check for a new message, once we receive it, steamOut will send it to the server
+		//frame.getMessage();
+	}
+	
+
+	public synchronized void handleChat(String msg)
+	{
+		//TODO
+		frame.recieveMessage(msg);
+	}
+
+	public void start() throws IOException
+	{
+		frame = new ChatGUI(username);
+		frame.setVisible(true);
+		//TODO need to use run() in it's own thread
+		authClient();
+		
+	}
+
+	public void stop()
+	{
+		//TODO
+	
+	}
+	
+	//Method to send solely the clients user to the server on start doesn't require input
+	public void authClient() throws IOException{
+		PrintWriter pw= new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+		pw.println(username+"\n");
+		pw.flush();
+	}
+	
+	
+}
+
+
+//class ServerListener implements Runnable {
+//	Client c;
+//	Scanner in;
+//	ServerListener(Client c, Socket s){
+//		try{
+//		this.c = c;
+//		in=new Scanner(new BufferedInputStream(s.getInputStream()));
+//	}catch(IOException e){
+//		e.printStackTrace();
+//	}
+//	}
+//	@Override
+//	public void run(){
+//		while(true){
+//			System.out.println("Waiting to read");
+//			String s = in.nextLine();
+//			c.handleChat(s);
+//		}
+//	}
+//}
+
+
