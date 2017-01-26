@@ -1,4 +1,3 @@
-package mason;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -8,10 +7,11 @@ import java.io.*;
 
 public class Server implements Runnable
 {
-	
+
+	private int msgCnt;
 	private ServerSocket serverSocket = null;
 	private Thread mainThread = null;
-	private File file = new File("chat.txt");
+	private File logFile = new File("chat.txt");
 	private PrintWriter writer;
 	private ServerGUI frame;
 	private Thread guiMessageThread;
@@ -70,36 +70,65 @@ public class Server implements Runnable
 	public void update(String received){
 		frame.recieveMessage(received);
 	}
+	
+	//logs message to the log file with the following format: Author # message
+	//needs to use class variables of logFile and msgCnt
+	public void logMessage(String message, String author){
+		try {
+			// Open log file, append, and close
+			PrintWriter logWriter = new PrintWriter(new FileWriter(logFile, true));
+			logWriter.println(author + (msgCnt++) + message);
+			logWriter.close();
+		} catch (IOException e) {
+			System.out.println("Encountered problem logging to chat.txt");
+		}
+	}
+	
+	public void logImgMessage(File image, String author){
+		logMessage(image.getName(), author);
+	}
+	
+	public void deleteMessage(int i){
+		
+	}
 
 	public static void main(String args[])
 	{
-		Server server = null;
-		server = new Server(1222);
+		Server server = new Server(1222);
 	}
-}//end of Server
+}
 
 //'Listens' for messages from the client
 class ClientHandler implements Runnable {
 	Server serv;
 	Socket s;
+	String name;
+	
+	Scanner in;
+	PrintWriter out;
 	
 	ClientHandler(Server serv, Socket s){
 		this.s=s;
 		this.serv=serv;
+		try{
+			in = new Scanner(new BufferedInputStream(s.getInputStream()));
+			out = new PrintWriter(new BufferedOutputStream(s.getOutputStream()));
+		}catch(IOException e){
+			System.out.println("Error");
+		}
+		
+		//wait for name message from client
+		while(name == ""){
+			name = in.nextLine();
+			if(name.contains(" ")){
+				System.out.println("Error: Name should not contain spaces.");
+			};
+		}
 	}
 	public void run(){
-		Scanner in;
-		try{
-			in=new Scanner(new BufferedInputStream(s.getInputStream()));
-			String st = in.nextLine();
-			serv.update(st+"\n");
 			while(true){
-				st=in.nextLine();
+				String st=in.nextLine();
 				serv.update(st+"\n");
 			}
-
-		}catch(IOException e){
-			e.printStackTrace();
-		}
 	}
 }

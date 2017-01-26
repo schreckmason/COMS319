@@ -1,5 +1,3 @@
-package mason;
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 
