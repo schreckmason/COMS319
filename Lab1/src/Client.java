@@ -66,7 +66,7 @@ public class Client implements Runnable
 	//Method to send solely the clients user to the server on start doesn't require input
 	public void authClient() throws IOException{
 		PrintWriter pw= new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
-		pw.println(username+"\n");
+		pw.println(username);
 		pw.flush();
 	}
 	

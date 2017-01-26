@@ -159,6 +159,10 @@ public class ServerGUI extends JFrame
 		contentPane.add(scrollBar);
 	}
 	
+	public Boolean getMsgStatus(){
+		return newMessage;
+	}
+	
 	public String getMessage(String in)
 	{
 		//poll for a new message
@@ -193,6 +197,7 @@ public class ServerGUI extends JFrame
 			{
 				//update the text area
 				chatArea.append(message);
+				
 				revalidate();				
 			}
 		});

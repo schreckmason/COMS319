@@ -98,7 +98,6 @@ class ClientHandler implements Runnable {
 			String st = in.nextLine();
 			serv.update(st+"\n");
 			while(true){
-				//serv.update(st+"\n");
 				st=in.nextLine()+sgi.getMessage(st);
 				Thread.sleep(1500);
 				serv.update(st+"\n");

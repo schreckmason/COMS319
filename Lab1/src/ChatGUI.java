@@ -1,4 +1,3 @@
-
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -168,8 +167,10 @@ public class ChatGUI extends JFrame
 	public String getMessage()
 	{
 		// TODO poll for a new message
-//		System.out.println(textField.getText());
-		message = textField.getText();
+		if(!textField.getText().equals(null)){
+			message = textField.getText();
+		}
+		else { message = "no msg"; }
 		return message;
 
 	}
@@ -177,17 +178,17 @@ public class ChatGUI extends JFrame
 	public void recieveMessage(String received)
 	{
 		// TODO new message received append message to chatArea
-		//chatArea.setText(received);
 		chatArea.append(received);
 	
 	}
 	
+	//Used to preface messages with the user supplied by spawning new ChatGUI in client
 	public String getUser(){
 		return user;
 	}
 	
+	//Method used to create and start a new thread using Sender, called on button click or 'enter'
 	public void runSendThread() throws IOException{
-		//pdw=new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
 		Thread senderThread = new Thread(new Sender(this,sock));
 		senderThread.start();
 	}
@@ -201,27 +202,18 @@ class Sender implements Runnable {
 		this.cgi=cgi;
 		this.sock=sock;
 	}
+	//Does the message formatting and sending action
+	//cgi is used for getter methods, sock is used for traffic
 	public void run(){
-		while(true){
 			try {
 				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
 				String st = cgi.getUser()+" : "+cgi.getMessage();
 				System.out.println(st);
-				pw.println(st+"\n");
+				pw.println(st);
 				pw.flush();
-				Thread.sleep(1000);
-				st=cgi.getUser()+":"+cgi.getMessage();
-				pw.println(st+"\n");
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
- catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 	}
 	
 	
