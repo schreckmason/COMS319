@@ -1,4 +1,3 @@
-//package lab3;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
@@ -48,6 +47,7 @@ public class ChatGUI extends JFrame
 	 */
 	public ChatGUI(String username) throws UnknownHostException, IOException
 	{
+		user=username;
 		setTitle("Client");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -77,6 +77,9 @@ public class ChatGUI extends JFrame
 		btnSend.setBounds(218, 168, 89, 23);
 		contentPane.add(btnSend);
 		
+		sock=new Socket("localhost", 1222);
+
+		
 		if(username.toLowerCase().equals("admin")){
 			//create field label
 			JLabel delMessage = new JLabel("Message ID");
@@ -94,9 +97,6 @@ public class ChatGUI extends JFrame
 			contentPane.add(deleteField);
 			deleteField.setColumns(10);
 			
-			sock=new Socket("localhost", 1222);
-			pdw=new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-
 		}
 		
 
@@ -114,6 +114,8 @@ public class ChatGUI extends JFrame
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+
+				
 			}
 		});
 		
@@ -141,7 +143,13 @@ public class ChatGUI extends JFrame
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
 					// TODO when user press Enter the message should be submit.
-					
+					try {
+						runSendThread();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
 					
 				}
 					
@@ -169,7 +177,8 @@ public class ChatGUI extends JFrame
 	public void recieveMessage(String received)
 	{
 		// TODO new message received append message to chatArea
-		chatArea.setText(received);
+		//chatArea.setText(received);
+		chatArea.append(received);
 	
 	}
 	
@@ -195,11 +204,20 @@ class Sender implements Runnable {
 	public void run(){
 		while(true){
 			try {
-				System.out.println(cgi.getMessage());
 				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-				pw.println(cgi.getUser()+" : "+cgi.getMessage()+"\n");
+				String st = cgi.getUser()+" : "+cgi.getMessage();
+				System.out.println(st);
+				pw.println(st+"\n");
 				pw.flush();
+				Thread.sleep(1000);
+				st=cgi.getUser()+":"+cgi.getMessage();
+				pw.println(st+"\n");
 			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+ catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}

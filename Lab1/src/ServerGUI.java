@@ -8,7 +8,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -160,7 +159,7 @@ public class ServerGUI extends JFrame
 		contentPane.add(scrollBar);
 	}
 	
-	public String getMessage()
+	public String getMessage(String in)
 	{
 		//poll for a new message
 		while(!newMessage)
@@ -168,6 +167,9 @@ public class ServerGUI extends JFrame
 			try
 			{
 				Thread.sleep(1);
+				if(!in.equals("")){
+					newMessage=true;
+				}
 			} catch (InterruptedException e)
 			{
 				// TODO Auto-generated catch block

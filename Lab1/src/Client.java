@@ -1,5 +1,3 @@
-
-
 import java.net.*;
 import java.util.Scanner;
 
@@ -74,27 +72,3 @@ public class Client implements Runnable
 	
 	
 }
-
-
-//class ServerListener implements Runnable {
-//	Client c;
-//	Scanner in;
-//	ServerListener(Client c, Socket s){
-//		try{
-//		this.c = c;
-//		in=new Scanner(new BufferedInputStream(s.getInputStream()));
-//	}catch(IOException e){
-//		e.printStackTrace();
-//	}
-//	}
-//	@Override
-//	public void run(){
-//		while(true){
-//			System.out.println("Waiting to read");
-//			String s = in.nextLine();
-//			c.handleChat(s);
-//		}
-//	}
-//}
-
-
