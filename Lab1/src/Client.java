@@ -1,3 +1,5 @@
+package mason;
+
 import java.net.*;
 import java.util.Scanner;
 

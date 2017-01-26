@@ -4,7 +4,7 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-
+import java.util.concurrent.Semaphore;
 import javax.management.RuntimeErrorException;
 
 import java.io.*;
@@ -15,7 +15,7 @@ public class Server
 	private ArrayList<ClientHandler> clients;
 	private ServerSocket serverSocket = null;
 	private Thread clientAccepter = null;
-	
+	private Semaphore updateSemaphore = new Semaphore(1);
 	private PrintWriter out;
 	
 	private File logFile = new File("chat.txt");
@@ -52,7 +52,7 @@ public class Server
 
 							// SPAWN A THREAD TO HANDLE CLIENT REQUEST
 							// TODO: Put in a thread since this constructor could wait.
-							ClientHandler clientHandler = new ClientHandler(clientSocket);
+							ClientHandler clientHandler = new ClientHandler(clientSocket, this);
 							Thread chThread = new Thread(clientHandler);
 							clients.add(clientHandler);
 							chThread.start();
@@ -94,19 +94,17 @@ public class Server
 		return -1;
 	}
 
-	public synchronized void handle(String input)
-	{
-		// TODO new message, send to clients and then write it to history
-	
-		//TODO update own gui
-		
-	}
+//	public synchronized void handle(String input)
+//	{
+//		// TODO new message, send to clients and then write it to history
+//		//TODO update own gui
+//	}
 
-	public synchronized void remove(int ID)
-	{
-		//TODO get the serverthread, remove it from the array and then terminate it
-		
-	}
+//	public synchronized void remove(int ID)
+//	{
+//		//TODO get the serverthread, remove it from the array and then terminate it
+//		
+//	}
 
 //	private void addThread(Socket socket)
 //	{
@@ -133,8 +131,7 @@ public class Server
 
 	public static void main(String args[])
 	{
-		Server server = null;
-		server = new Server(1222);
+		Server server = new Server(1222);
 	}
 }
 
@@ -143,8 +140,9 @@ class ClientHandler implements Runnable {
 	public String name;
 	private Scanner in;
 	private PrintWriter out;
-	
-	ClientHandler(Socket s) {
+	private Server server;
+	private boolean killHandler = false;
+	ClientHandler(Socket s, Server server) {
 		this.s = s;
 		name = "";
 		try {
@@ -165,10 +163,25 @@ class ClientHandler implements Runnable {
 	}
 
 	public void run() { 
+		while(!killHandler){
+			String message = in.next();
+			if(message == "delete" && in.hasNextInt()){
+				sendDelete(in.nextInt());
+			} else {
+				message += in.nextLine();
+			}
+			handleRequest(message);
+		}
+	}
+	
+	void sendDelete(int line){
 		
 	}
-	 
 	void handleRequest(String s) {
-		
+		if(name.toUpperCase() == "ADMIN"){
+			if(s.startsWith("delete ")){
+				
+			}
+		}
 	}
 }

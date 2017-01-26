@@ -1,3 +1,4 @@
+package mason;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Random;
@@ -84,12 +85,10 @@ public class Server implements Runnable
 class ClientHandler implements Runnable {
 	Server serv;
 	Socket s;
-	ServerGUI sgi;
 	
-	ClientHandler(Server serv, Socket s, ServerGUI sgi){
+	ClientHandler(Server serv, Socket s){
 		this.s=s;
 		this.serv=serv;
-		this.sgi=sgi;
 	}
 	public void run(){
 		Scanner in;
@@ -98,7 +97,7 @@ class ClientHandler implements Runnable {
 			String st = in.nextLine();
 			serv.update(st+"\n");
 			while(true){
-				st=in.nextLine()+sgi.getMessage(st);
+				st=in.nextLine();
 				Thread.sleep(1500);
 				serv.update(st+"\n");
 			}
