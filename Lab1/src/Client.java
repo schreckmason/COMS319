@@ -14,7 +14,6 @@ public class Client implements Runnable
 {
 	private Socket socket = null;
 	private Thread thread = null;
-	private DataOutputStream streamOut = null;
 	private String username;
 	private ChatGUI frame;
 
@@ -25,7 +24,7 @@ public class Client implements Runnable
 		try
 		{
 			socket = new Socket(ipAddr, serverPort);
-			start();run();
+			start();
 		} catch (UnknownHostException h)
 		{
 			JOptionPane.showMessageDialog(new JFrame(), "Unknown Host " + h.getMessage());
@@ -54,15 +53,9 @@ public class Client implements Runnable
 	{
 		frame = new ChatGUI(username);
 		frame.setVisible(true);
-		//TODO need to use run() in it's own thread
 		authClient();
+		//addThread(socket);
 		
-	}
-
-	public void stop()
-	{
-		//TODO
-	
 	}
 	
 	//Method to send solely the clients user to the server on start doesn't require input
@@ -72,5 +65,7 @@ public class Client implements Runnable
 		pw.flush();
 	}
 	
-	
+	public void update(String recieved){
+		frame.recieveMessage(recieved);
+	}
 }
