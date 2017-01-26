@@ -34,6 +34,7 @@ public class ChatGUI extends JFrame
 	
 	private volatile boolean newMessage = false; 
 	private String message;
+	private boolean isAdmin=false;
 	
 	private Socket sock = null;
 	private String user="";
@@ -80,6 +81,7 @@ public class ChatGUI extends JFrame
 
 		
 		if(username.toLowerCase().equals("admin")){
+			isAdmin=true;
 			//create field label
 			JLabel delMessage = new JLabel("Message ID");
 			delMessage.setBounds(20, 195, 90, 14);
@@ -95,7 +97,23 @@ public class ChatGUI extends JFrame
 			deleteField.setBounds(90, 195, 114, 17);
 			contentPane.add(deleteField);
 			deleteField.setColumns(10);
-			
+		
+			btnDel.addActionListener(new ActionListener()
+			{
+				
+				@Override
+				public void actionPerformed(ActionEvent e)
+				{
+					try {
+						runDelThread();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+
+					
+				}
+			});
 		}
 		
 
@@ -187,10 +205,42 @@ public class ChatGUI extends JFrame
 		return user;
 	}
 	
+	public String getDelMsg(){
+		return deleteField.getText();
+		
+	}
+	
 	//Method used to create and start a new thread using Sender, called on button click or 'enter'
 	public void runSendThread() throws IOException{
 		Thread senderThread = new Thread(new Sender(this,sock));
 		senderThread.start();
+	}
+	
+	public void runDelThread() throws IOException{
+		Thread delThread = new Thread(new AdminDelete(isAdmin, this, sock));
+		delThread.start();
+	}
+}
+
+class AdminDelete implements Runnable{
+	boolean isAdmin;
+	ChatGUI cgi;
+	Socket sock;
+	PrintWriter pw;
+	AdminDelete(boolean isAdmin, ChatGUI cgi, Socket sock){
+		this.isAdmin=isAdmin;
+		this.cgi=cgi;
+		this.sock=sock;
+	}
+	public void run(){
+		try{
+			pw=new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
+			String delMsg = "Delete "+cgi.getDelMsg();
+			pw.println(delMsg);
+			pw.flush();
+		}catch(IOException e){
+			e.printStackTrace();
+		}
 	}
 }
 

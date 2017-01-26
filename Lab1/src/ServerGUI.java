@@ -8,6 +8,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -28,11 +33,14 @@ public class ServerGUI extends JFrame
 	
 	private volatile boolean newMessage = false; 
 	private String message;
+	private Socket sock;
 
 	/**
 	 * Create the frame.
+	 * @throws IOException 
+	 * @throws UnknownHostException 
 	 */
-	public ServerGUI()
+	public ServerGUI() throws UnknownHostException, IOException
 	{
 		setTitle("Server");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -75,6 +83,7 @@ public class ServerGUI extends JFrame
 		JButton btnSend2 = new JButton("Delete");
 		btnSend2.setBounds(228, 199, 89, 23);
 		contentPane.add(btnSend2);
+		sock=new Socket("localhost",1222);
 		//when btnsend pressed, send the message
 		btnSend.addActionListener(new ActionListener()
 		{
@@ -82,7 +91,12 @@ public class ServerGUI extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				
+				try {
+					runSendThread();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 		btnSend2.addActionListener(new ActionListener()
@@ -91,7 +105,7 @@ public class ServerGUI extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				
+	
 				
 			}
 		});
@@ -118,7 +132,12 @@ public class ServerGUI extends JFrame
 			{
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					
+					try {
+						runSendThread();
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 					
 			}
@@ -157,10 +176,6 @@ public class ServerGUI extends JFrame
 		scrollBar.setSize(186,102);
 		scrollBar.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		contentPane.add(scrollBar);
-	}
-	
-	public Boolean getMsgStatus(){
-		return newMessage;
 	}
 	
 	public String getMessage(String in)
@@ -202,4 +217,39 @@ public class ServerGUI extends JFrame
 			}
 		});
 	}
+	public String getUser(){
+		return "Server";
+	}
+	public String getMessage(){
+		return textField.getText();
+	}
+	public void runSendThread() throws IOException{
+		Thread senderThread = new Thread(new ServerSender(this,sock));
+		senderThread.start();
+	}
+}
+
+class ServerSender implements Runnable {
+	ServerGUI sgi;
+	Socket sock;
+	PrintWriter pw;
+	ServerSender(ServerGUI sgi, Socket sock){
+		this.sgi=sgi;
+		this.sock=sock;
+	}
+	//Does the message formatting and sending action
+	//cgi is used for getter methods, sock is used for traffic
+	public void run(){
+			try {
+				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
+				String st = sgi.getUser()+" : "+sgi.getMessage();
+				System.out.println(st);
+				pw.println(st);
+				pw.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
+	
+	
 }

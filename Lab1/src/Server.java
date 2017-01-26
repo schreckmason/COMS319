@@ -42,7 +42,7 @@ public class Server implements Runnable
 
 	}
 
-	public void start()
+	public void start() throws UnknownHostException, IOException
 	{
 		frame = new ServerGUI();
 		frame.setVisible(true);
@@ -53,13 +53,10 @@ public class Server implements Runnable
 
 	private void addThread(Socket socket)
 	{
-		//TODO add new client
-		int clientNum = 0;
 		while(true) {
 			try{
 				socket=serverSocket.accept();
-				//System.out.println("Connected " + clientNum++);
-				Thread validCon = new Thread(new ClientHandler(this,socket,frame));
+				Thread validCon = new Thread(new ClientHandler(this,socket));
 				validCon.start();
 			}catch(IOException e){
 				System.out.println("Error server connection failed");
@@ -84,12 +81,10 @@ public class Server implements Runnable
 class ClientHandler implements Runnable {
 	Server serv;
 	Socket s;
-	ServerGUI sgi;
 	
-	ClientHandler(Server serv, Socket s, ServerGUI sgi){
+	ClientHandler(Server serv, Socket s){
 		this.s=s;
 		this.serv=serv;
-		this.sgi=sgi;
 	}
 	public void run(){
 		Scanner in;
@@ -98,15 +93,11 @@ class ClientHandler implements Runnable {
 			String st = in.nextLine();
 			serv.update(st+"\n");
 			while(true){
-				st=in.nextLine()+sgi.getMessage(st);
-				Thread.sleep(1500);
+				st=in.nextLine();
 				serv.update(st+"\n");
 			}
 
 		}catch(IOException e){
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
