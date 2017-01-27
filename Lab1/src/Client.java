@@ -51,17 +51,20 @@ public class Client implements Runnable
 	{
 		//depending on option, open up image GUI or message GUI
 	
-		frame = new ChatGUI(username);
+		frame = new ChatGUI(username, socket);
 		frame.setVisible(true);
 		authClient();
 		//addThread(socket);
-		
 	}
 	
 	//Method to send solely the clients user to the server on start doesn't require input
 	public void authClient() throws IOException{
 		PrintWriter pw= new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+//		pw.println();
+
+		pw.flush();
 		pw.println(username);
+		System.out.println("Sending name: " + username);
 		pw.flush();
 	}
 	

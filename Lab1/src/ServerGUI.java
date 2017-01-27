@@ -198,8 +198,7 @@ public class ServerGUI extends JFrame
 			public void run()
 			{
 				//update the text area
-				chatArea.append(message);
-				
+				chatArea.append(message + "\n");
 				revalidate();				
 			}
 		});

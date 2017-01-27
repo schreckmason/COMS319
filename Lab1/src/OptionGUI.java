@@ -42,7 +42,7 @@ public class OptionGUI extends JFrame {
 		contentPane.add(clientButton);
 		
 		JButton imageButton = new JButton("Image");
-		imageButton.setBounds(100, 64, 89,23);
+		imageButton.setBounds(100, 64, 89, 23);
 		contentPane.add(imageButton);
 		
 		//when the button is pressed, send the name to the client application and connect to the server
