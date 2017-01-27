@@ -20,6 +20,7 @@ public class OptionGUI extends JFrame {
 
 	/**
 	 * Create the frame.
+	 * A GUI for allowing user interaction to determine their session type, either image or text
 	 */
 	public OptionGUI(String username) {
 		name=username;
@@ -70,6 +71,7 @@ public class OptionGUI extends JFrame {
 			}
 		});
 		
+		//when the button is pressed, open a new ImgClient which will prompt a file selector
 		imageButton.addActionListener(new ActionListener()
 		{
 			
@@ -83,15 +85,12 @@ public class OptionGUI extends JFrame {
 						try
 						{
 							ImgClient imgClient=new ImgClient("localhost",name,1222);
-							//iv=new ImageViewer(name);
-							//iv.setVisible(true);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
 					}
 				});
 				
-				//dispose of this login page
 				dispose();
 				
 			}

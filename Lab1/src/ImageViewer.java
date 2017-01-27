@@ -38,12 +38,12 @@ ImageViewer(String username) throws IOException{
 	setContentPane(contentPane);
 	contentPane.setLayout(null);
 
-	//Format me
+	//creates send button
 	JButton btnSend = new JButton("Send");
 	btnSend.setBounds(420, 200, 89, 23);
 	contentPane.add(btnSend);
 	
-	//Format me
+	//create chat area, needs to be updated when a server sends a message
 	chatArea = new JTextArea();
 	chatArea.setForeground(Color.BLACK);
 	chatArea.setFont(new Font("Tahoma", Font.PLAIN, 13));
@@ -71,21 +71,20 @@ ImageViewer(String username) throws IOException{
 		@Override
 		public void actionPerformed(ActionEvent e)
 		{
-			addThread(); //this spawns a thread to send the actual image (shows up in strange symbols currently
+			addThread(); //this spawns a thread to send the actual image (shows up in strange symbols currently in server, need to account for this in loggin)
 			PrintWriter pw;
 			try {
 				pw = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
 				pw.println(username+" : "+filename);
 				pw.flush();
 			} catch (IOException e1) {
-				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 		}
 	});
 	}
 
-//Got from stack overflow
+//Got from stack overflow -- gets the file name that was chosen in the swing file chooser
 public static File getSelectedFileWithExtension(JFileChooser c) {
     File file = c.getSelectedFile();
     if (c.getFileFilter() instanceof FileNameExtensionFilter) {
@@ -108,6 +107,7 @@ public void addThread(){
 	th.start();
 }
 
+//Sends the image via DataOutputStream, may need to change to ObjectOutputStream per Mitra's email
 class ImageSender implements Runnable {
 	ImageViewer iv;
 	Socket sock;
@@ -117,7 +117,9 @@ class ImageSender implements Runnable {
 		this.sock=sock;
 		this.file=file;
 	}
+	
 	//Sends the actual image to the server -- to be saved by the server to images folder
+	//See Mitra's email to change this if you desire
 	public void run(){
 		int i;
 		    FileInputStream fis;
@@ -131,10 +133,8 @@ class ImageSender implements Runnable {
 			    os.close();
 			    sock.close();
 			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

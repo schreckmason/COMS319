@@ -34,6 +34,8 @@ public class ImgClient {
 		imgGUI.setVisible(true);
 		//authenticate();
 	}
+	
+	//Not currently in use, might be useful to you for logging though...if it is not feel free to delete
 	public void authenticate() throws IOException{
 		PrintWriter pw=new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
 		pw.println(username+" : image mode");
