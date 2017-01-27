@@ -89,12 +89,6 @@ public class ServerGUI extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				try {
-					runSendThread();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 			}
 		});
 		btnSend2.addActionListener(new ActionListener()
@@ -130,12 +124,7 @@ public class ServerGUI extends JFrame
 			{
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					try {
-						runSendThread();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
+					
 				}
 					
 			}
@@ -209,8 +198,7 @@ public class ServerGUI extends JFrame
 			public void run()
 			{
 				//update the text area
-				chatArea.append(message);
-				
+				chatArea.append(message + "\n");
 				revalidate();				
 			}
 		});
@@ -221,33 +209,4 @@ public class ServerGUI extends JFrame
 	public String getMessage(){
 		return textField.getText();
 	}
-	public void runSendThread() throws IOException{
-		Thread senderThread = new Thread(new ServerSender(this,sock));
-		senderThread.start();
-	}
-}
-
-class ServerSender implements Runnable {
-	ServerGUI sgi;
-	Socket sock;
-	PrintWriter pw;
-	ServerSender(ServerGUI sgi, Socket sock){
-		this.sgi=sgi;
-		this.sock=sock;
-	}
-	//Does the message formatting and sending action
-	//cgi is used for getter methods, sock is used for traffic
-	public void run(){
-			try {
-				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-				String st = sgi.getUser()+" : "+sgi.getMessage();
-				System.out.println(st);
-				pw.println(st);
-				pw.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
-	
-	
 }

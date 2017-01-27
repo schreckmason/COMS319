@@ -8,7 +8,7 @@ import java.io.*;
 public class Server implements Runnable
 {
 
-	private int msgCnt;
+	private int msgCnt = 1;
 	private ServerSocket serverSocket = null;
 	private Thread mainThread = null;
 	private File logFile = new File("chat.txt");
@@ -70,14 +70,20 @@ public class Server implements Runnable
 	public void update(String received){
 		frame.recieveMessage(received);
 	}
+	public void messageReceived(String message, String author){
+		update(author + ": " + message);
+		logMessage(message, author);
+	}
 	
 	//logs message to the log file with the following format: Author # message
 	//needs to use class variables of logFile and msgCnt
 	public void logMessage(String message, String author){
+		System.out.println("trying to log");
 		try {
 			// Open log file, append, and close
+			System.out.println(Thread.currentThread().getName());
 			PrintWriter logWriter = new PrintWriter(new FileWriter(logFile, true));
-			logWriter.println(author + (msgCnt++) + message);
+			logWriter.println((msgCnt++) + " " + author + " " + message);
 			logWriter.close();
 		} catch (IOException e) {
 			System.out.println("Encountered problem logging to chat.txt");
@@ -88,8 +94,30 @@ public class Server implements Runnable
 		logMessage(image.getName(), author);
 	}
 	
-	public void deleteMessage(int i){
-		
+	public boolean deleteLine(int lineNum) {
+		boolean result = false;
+	    try {
+	        // input the file content to the String "input"
+	        BufferedReader br = new BufferedReader(new FileReader(logFile));
+	        String line, input = "";
+
+	        while ((line = br.readLine()) != null){
+	        	if(line.startsWith(lineNum + "")){
+	        		result = true;
+	        	} else {
+	        		input += line + "\r\n";
+	        	}
+	        }
+	        br.close();
+
+	        // write the new String with the replaced line OVER the same file
+	        FileOutputStream fileOut = new FileOutputStream(logFile);
+	        fileOut.write(input.getBytes());
+	        fileOut.close();
+	    } catch (Exception e) {
+	        System.out.println("Problem reading file.");
+	    }
+	    return result;
 	}
 
 	public static void main(String args[])
@@ -110,6 +138,7 @@ class ClientHandler implements Runnable {
 	ClientHandler(Server serv, Socket s){
 		this.s=s;
 		this.serv=serv;
+		this.name = ""; //Empty string represents no name yet
 		try{
 			in = new Scanner(new BufferedInputStream(s.getInputStream()));
 			out = new PrintWriter(new BufferedOutputStream(s.getOutputStream()));
@@ -118,17 +147,38 @@ class ClientHandler implements Runnable {
 		}
 		
 		//wait for name message from client
-		while(name == ""){
-			name = in.nextLine();
-			if(name.contains(" ")){
-				System.out.println("Error: Name should not contain spaces.");
-			};
-		}
+//		System.out.println("Waiting for a name");
+//		while(name == ""){
+//
+//			System.out.println("in loop");
+//			name = in.nextLine();
+//			if(name.contains(" ")){
+//				System.out.println("Error: Name should not contain spaces.");
+//			};
+//		}
+//		System.out.println("Received name for client: " + name);
 	}
 	public void run(){
-			while(true){
-				String st=in.nextLine();
-				serv.update(st+"\n");
+		this.name = in.nextLine();
+		System.out.println("Name set to: " + this.name);
+		while(true){
+			String msg=in.nextLine();
+			System.out.println("Name: " + name+"; Msg: " +msg);
+			handleMessage(msg);
+		}
+	}
+	
+	public void handleMessage(String message){
+		if(this.name.equals("")){
+			this.name = message;
+		} else if(name.toUpperCase().equals("ADMIN")){
+			System.out.print("admin sent message");
+			if(message.startsWith("Delete ")){
+				System.out.print("trying to delete");
+				serv.deleteLine(Integer.parseInt(message.substring(7)));
 			}
+		} else {
+			serv.messageReceived(message, name);
+		}
 	}
 }

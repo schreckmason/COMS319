@@ -1,3 +1,0 @@
-Drake 1 Hello, this is my first message.
-Mason 2 I am responding.
-Mason 3 Message numbers are cumulative.

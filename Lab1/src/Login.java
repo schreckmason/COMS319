@@ -16,6 +16,7 @@ public class Login extends JFrame {
 
 	private JPanel contentPane;
 	private JTextField nameField;
+	private OptionGUI ogi;
 
 	/**
 	 * Launch the application.
@@ -79,7 +80,9 @@ public class Login extends JFrame {
 					{
 						try
 						{
-							Client client = new Client("localhost", name, 1222);
+							//Spawns an option GUI to allow for user input to determine session type
+							ogi=new OptionGUI(name);
+							ogi.setVisible(true);
 						} catch (Exception e) {
 							e.printStackTrace();
 						}

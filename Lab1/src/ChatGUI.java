@@ -45,9 +45,10 @@ public class ChatGUI extends JFrame
 	 * @throws IOException 
 	 * @throws UnknownHostException 
 	 */
-	public ChatGUI(String username) throws UnknownHostException, IOException
+	public ChatGUI(String username, Socket sock) throws UnknownHostException, IOException
 	{
 		user=username;
+		this.sock = sock;
 		setTitle("Client");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -76,9 +77,6 @@ public class ChatGUI extends JFrame
 		JButton btnSend = new JButton("Send");
 		btnSend.setBounds(218, 168, 89, 23);
 		contentPane.add(btnSend);
-		
-		sock=new Socket("localhost", 1222);
-
 		
 		if(username.toLowerCase().equals("admin")){
 			isAdmin=true;
@@ -257,7 +255,7 @@ class Sender implements Runnable {
 	public void run(){
 			try {
 				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-				String st = cgi.getUser()+" : "+cgi.getMessage();
+				String st = cgi.getMessage();//cgi.getUser()+" : "+
 				System.out.println(st);
 				pw.println(st);
 				pw.flush();
