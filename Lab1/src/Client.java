@@ -49,6 +49,8 @@ public class Client implements Runnable
 
 	public void start() throws IOException
 	{
+		//depending on option, open up image GUI or message GUI
+	
 		frame = new ChatGUI(username);
 		frame.setVisible(true);
 		authClient();
@@ -67,3 +69,5 @@ public class Client implements Runnable
 		frame.recieveMessage(recieved);
 	}
 }
+
+//TODO wait to recieve messages
