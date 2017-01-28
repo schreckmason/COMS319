@@ -67,6 +67,14 @@ public class Server
 		}
 	}
 	
+	public void broadcastAdminMsg(String message){
+		broadcastMessage("Admin: " + message);
+	}
+	
+	public void broadcastServerMsg(String message){
+		broadcastMessage("Server: " + message);
+	}
+	
 	//logs message to the log file with the following format: Author # message
 	//needs to use class variables of logFile and msgCnt
 	public void logMessage(String message, String author){
@@ -163,6 +171,7 @@ class ClientHandler implements Runnable {
 	public void sendMessage(String message){
 		System.out.println("Sending message to: " + name);
 		out.println(message);
+		out.flush();
 	}
 	
 	public void handleMessage(String message){

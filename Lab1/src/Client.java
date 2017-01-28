@@ -87,7 +87,7 @@ public class Client implements Runnable
 		public void run() {
 			while(true){
 				System.out.println("Waiting for message from server.");
-				String msg=in.nextLine();
+				String msg = in.nextLine();
 				System.out.println("Received: " + msg);
 				client.handleMessage(msg);
 			}

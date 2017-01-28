@@ -194,7 +194,7 @@ public class ChatGUI extends JFrame
 	public void recieveMessage(String received)
 	{
 		// TODO new message received append message to chatArea
-		chatArea.append(received);
+		chatArea.append(received + "\n");
 	
 	}
 	

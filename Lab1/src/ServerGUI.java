@@ -93,7 +93,7 @@ public class ServerGUI extends JFrame
 			public void actionPerformed(ActionEvent e)
 			{
 				String messageTxt = textField.getText();
-				server.broadcastMessage(messageTxt);
+				server.broadcastServerMsg(messageTxt);
 			}
 		});
 		btnSend2.addActionListener(new ActionListener()
