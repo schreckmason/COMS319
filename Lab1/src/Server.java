@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import java.io.*;
 
-public class Server implements Runnable
+public class Server
 {
 
 	private int msgCnt = 1;
@@ -15,6 +15,7 @@ public class Server implements Runnable
 	private PrintWriter writer;
 	private ServerGUI frame;
 	private Thread guiMessageThread;
+	private ArrayList<ClientHandler> clients;
 
 	public Server(int port)
 	{
@@ -24,41 +25,26 @@ public class Server implements Runnable
 			System.out.println("Binding to port " + port + ", please wait  ...");
 			serverSocket = new ServerSocket(port);
 			System.out.println("Server started: " + serverSocket);
-			start();
-			run();
+			clients = new ArrayList<>();
+			frame = new ServerGUI(this);
+			frame.setVisible(true);
+			acceptClients();
 		} catch (IOException ioe)
 		{
 			System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
 		}
 	}
 
-	public void run()
-	{
-		//TODO wait for a client or show error
-		try{
-			addThread(new Socket("localhost",1222));
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-
-	}
-
-	public void start() throws UnknownHostException, IOException
-	{
-		frame = new ServerGUI();
-		frame.setVisible(true);
-		//TODO launch a thread to read for new messages by the server
-		
-	}
-	
-
-	private void addThread(Socket socket)
+	private void acceptClients()
 	{
 		while(true) {
 			try{
-				socket=serverSocket.accept();
-				Thread validCon = new Thread(new ClientHandler(this,socket));
-				validCon.start();
+				Socket socket=serverSocket.accept();
+				System.out.println("Client connected");
+				ClientHandler client = new ClientHandler(this,socket);
+				clients.add(client);
+				Thread clientThread = new Thread(client);
+				clientThread.start();
 			}catch(IOException e){
 				System.out.println("Error server connection failed");
 				System.exit(-1);
@@ -73,6 +59,12 @@ public class Server implements Runnable
 	public void messageReceived(String message, String author){
 		update(author + ": " + message);
 		logMessage(message, author);
+	}
+	
+	public void broadcastMessage(String message){
+		for(ClientHandler ch:clients){
+			ch.sendMessage(message);
+		}
 	}
 	
 	//logs message to the log file with the following format: Author # message
@@ -166,6 +158,11 @@ class ClientHandler implements Runnable {
 			System.out.println("Name: " + name+"; Msg: " +msg);
 			handleMessage(msg);
 		}
+	}
+	
+	public void sendMessage(String message){
+		System.out.println("Sending message to: " + name);
+		out.println(message);
 	}
 	
 	public void handleMessage(String message){

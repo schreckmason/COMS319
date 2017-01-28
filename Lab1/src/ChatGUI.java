@@ -255,7 +255,7 @@ class Sender implements Runnable {
 	public void run(){
 			try {
 				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-				String st = cgi.getMessage();//cgi.getUser()+" : "+
+				String st = cgi.getMessage();
 				System.out.println(st);
 				pw.println(st);
 				pw.flush();

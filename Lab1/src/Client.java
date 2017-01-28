@@ -11,7 +11,7 @@ import java.io.*;
 public class Client implements Runnable
 {
 	private Socket socket = null;
-//	private Thread thread = null;
+	private Thread listenerThread;
 	private String username;
 	private ChatGUI chatGui;
 	private PrintWriter pw;
@@ -24,6 +24,8 @@ public class Client implements Runnable
 		{
 			socket = new Socket(ipAddr, serverPort);
 			pw = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
+			listenerThread = new Thread(new MessageListener(socket, this));
+			listenerThread.start();
 			start();
 		} catch (Exception e)
 		{
@@ -68,8 +70,10 @@ public class Client implements Runnable
 	
 	// Start of nested class 
 	class MessageListener implements Runnable{
+		
 		Scanner in;
 		Client client;
+		
 		private MessageListener(Socket sock, Client client) {
 			try {
 				in = new Scanner(new BufferedInputStream(sock.getInputStream()));
@@ -82,6 +86,7 @@ public class Client implements Runnable
 		@Override
 		public void run() {
 			while(true){
+				System.out.println("Waiting for message from server.");
 				String msg=in.nextLine();
 				System.out.println("Received: " + msg);
 				client.handleMessage(msg);
@@ -89,6 +94,3 @@ public class Client implements Runnable
 		}
 	}
 }
-
-
-//TODO wait to recieve messages

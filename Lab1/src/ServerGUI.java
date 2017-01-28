@@ -32,14 +32,18 @@ public class ServerGUI extends JFrame
 	private volatile boolean newMessage = false; 
 	private String message;
 	private Socket sock;
+	private Server server;
 
 	/**
 	 * Create the frame.
 	 * @throws IOException 
 	 * @throws UnknownHostException 
 	 */
-	public ServerGUI() throws UnknownHostException, IOException
+	public ServerGUI(Server server) throws UnknownHostException, IOException
 	{
+		this.server = server;
+		System.out.println("Creating server gui");
+		// SETUP GUI
 		setTitle("Server");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -81,7 +85,6 @@ public class ServerGUI extends JFrame
 		JButton btnSend2 = new JButton("Delete");
 		btnSend2.setBounds(228, 199, 89, 23);
 		contentPane.add(btnSend2);
-		sock=new Socket("localhost",1222);
 		//when btnsend pressed, send the message
 		btnSend.addActionListener(new ActionListener()
 		{
@@ -89,6 +92,8 @@ public class ServerGUI extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
+				String messageTxt = textField.getText();
+				server.broadcastMessage(messageTxt);
 			}
 		});
 		btnSend2.addActionListener(new ActionListener()
