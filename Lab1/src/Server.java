@@ -8,7 +8,7 @@ import java.io.*;
 public class Server
 {
 
-	private int msgCnt = 1;
+	private int msgCnt = 0;
 	private ServerSocket serverSocket = null;
 	private Thread mainThread = null;
 	private File logFile = new File("chat.txt");
@@ -56,23 +56,35 @@ public class Server
 	public void update(String received){
 		frame.recieveMessage(received);
 	}
-	public void messageReceived(String message, String author){
-		update(author + ": " + message);
-		logMessage(message, author);
-	}
 	
-	public void broadcastMessage(String message){
-		for(ClientHandler ch:clients){
-			ch.sendMessage(message);
+	public void messageReceived(String author, String message){
+		update(author + ": " + message);
+		msgCnt++;
+		logMessage(message, author);
+		if(author.toUpperCase().equals("ADMIN") || author.equals("Server")){
+			broadcastMessage(author, message);
+		} else {
+			//if admin connected, send them the update
+			for(ClientHandler ch:clients){
+				if(ch.name.toUpperCase().equals("ADMIN")){
+					ch.sendMessage(formatAdminMsg(author, message));
+				}
+			}
 		}
 	}
 	
-	public void broadcastAdminMsg(String message){
-		broadcastMessage("Admin: " + message);
+	public String formatAdminMsg(String author, String message){
+		return "(" + msgCnt + ") " + author + ": " + message;
 	}
 	
-	public void broadcastServerMsg(String message){
-		broadcastMessage("Server: " + message);
+	public void broadcastMessage(String author, String message){
+		for(ClientHandler ch:clients){
+			if(ch.name.toUpperCase().equals("ADMIN")){
+				ch.sendMessage(formatAdminMsg(author, message));
+			} else {
+				ch.sendMessage(author + ": " + message);
+			}
+		}
 	}
 	
 	//logs message to the log file with the following format: Author # message
@@ -83,7 +95,7 @@ public class Server
 			// Open log file, append, and close
 			System.out.println(Thread.currentThread().getName());
 			PrintWriter logWriter = new PrintWriter(new FileWriter(logFile, true));
-			logWriter.println((msgCnt++) + " " + author + " " + message);
+			logWriter.println(msgCnt + " " + author + " " + message);
 			logWriter.close();
 		} catch (IOException e) {
 			System.out.println("Encountered problem logging to chat.txt");
@@ -92,6 +104,23 @@ public class Server
 	
 	public void logImgMessage(File image, String author){
 		logMessage(image.getName(), author);
+	}
+	
+	public String readLogToString(){
+        String line, input = "";
+	    try {
+	        // input the file content to the String "input"
+	        BufferedReader br = new BufferedReader(new FileReader(logFile));
+	        
+	        //read in file
+	        while ((line = br.readLine()) != null) input += line + "\r\n";
+	        
+	        br.close();
+	    } catch (Exception e) {
+	        System.out.println("Problem reading file.");
+	        return null;
+	    }
+	    return input;
 	}
 	
 	public boolean deleteLine(int lineNum) {
@@ -161,6 +190,9 @@ class ClientHandler implements Runnable {
 	public void run(){
 		this.name = in.nextLine();
 		System.out.println("Name set to: " + this.name);
+		if(name.toUpperCase().equals("ADMIN")){
+			sendAllMessages();
+		}
 		while(true){
 			String msg=in.nextLine();
 			System.out.println("Name: " + name+"; Msg: " +msg);
@@ -175,16 +207,22 @@ class ClientHandler implements Runnable {
 	}
 	
 	public void handleMessage(String message){
-		if(this.name.equals("")){
-			this.name = message;
-		} else if(name.toUpperCase().equals("ADMIN")){
+		if(name.toUpperCase().equals("ADMIN")){
 			System.out.print("admin sent message");
 			if(message.startsWith("Delete ")){
 				System.out.print("trying to delete");
 				serv.deleteLine(Integer.parseInt(message.substring(7)));
+			} else {
+				serv.messageReceived(name, message);
 			}
 		} else {
-			serv.messageReceived(message, name);
+			serv.messageReceived(name, message);
 		}
+	}
+	
+	// Fill in admin by sending messages for all chat so far
+	public void sendAllMessages(){
+		System.out.println("Reading log to admin");
+		sendMessage(serv.readLogToString());
 	}
 }
