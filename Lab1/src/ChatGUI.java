@@ -32,24 +32,20 @@ public class ChatGUI extends JFrame
 	private JTextField deleteField;
 	private JTextArea chatArea;
 	
-	private volatile boolean newMessage = false; 
-	private String message;
-	private boolean isAdmin=false;
-	
-	private Socket sock = null;
-	private String user="";
-	private PrintWriter pdw;
+	private Client client;
+	private String user;
 	
 	/**
 	 * Create the frame.
 	 * @throws IOException 
 	 * @throws UnknownHostException 
 	 */
-	public ChatGUI(String username, Socket sock) throws UnknownHostException, IOException
+	public ChatGUI(String username, Client client) throws UnknownHostException, IOException
 	{
 		user=username;
-		this.sock = sock;
-		setTitle("Client");
+		this.client = client;
+		
+		setTitle(username);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -78,8 +74,13 @@ public class ChatGUI extends JFrame
 		btnSend.setBounds(218, 168, 89, 23);
 		contentPane.add(btnSend);
 		
+		JScrollPane scrollBar = new JScrollPane(chatArea);
+		scrollBar.setLocation(24, 32);
+		scrollBar.setSize(186,102);
+		scrollBar.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		contentPane.add(scrollBar);
+		
 		if(username.toLowerCase().equals("admin")){
-			isAdmin=true;
 			//create field label
 			JLabel delMessage = new JLabel("Message ID");
 			delMessage.setBounds(20, 195, 90, 14);
@@ -98,171 +99,65 @@ public class ChatGUI extends JFrame
 		
 			btnDel.addActionListener(new ActionListener()
 			{
-				
 				@Override
 				public void actionPerformed(ActionEvent e)
 				{
-					try {
-						runDelThread();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-					
+					sendDelCmd();
 				}
 			});
 		}
 		
-
-		
 		//when btnsend pressed, send the message
 		btnSend.addActionListener(new ActionListener()
 		{
-			
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-				try {
-					runSendThread();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-				
+				sendMessage();
 			}
 		});
 		
 		//allow for hitting enter to send a chat message
 		textField.addKeyListener(new KeyListener() 
 		{
-			
 			@Override
 			public void keyTyped(KeyEvent e) 
 			{
-				// TODO Auto-generated method stub
-				
 			}
-			
 			@Override
 			public void keyReleased(KeyEvent e) 
 			{
-				// TODO Auto-generated method stub
-				
 			}
-			
 			@Override
 			public void keyPressed(KeyEvent e) 
 			{
 				if(e.getKeyCode() == KeyEvent.VK_ENTER)
 				{
-					// TODO when user press Enter the message should be submit.
-					try {
-						runSendThread();
-					} catch (IOException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-
-					
+					sendMessage();
 				}
-					
 			}
 		});
-		
-		JScrollPane scrollBar = new JScrollPane(chatArea);
-		scrollBar.setLocation(24, 32);
-		scrollBar.setSize(186,102);
-		scrollBar.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		contentPane.add(scrollBar);
-		
-		
-	}
-	
-	public String getMessage()
-	{
-		// TODO poll for a new message
-		if(!textField.getText().equals(null)){
-			message = textField.getText();
-		}
-		else { message = "no msg"; }
-		return message;
-
 	}
 	
 	public void recieveMessage(String received)
 	{
-		// TODO new message received append message to chatArea
 		chatArea.append(received + "\n");
+	}
 	
+	public void sendMessage(){
+		String message = textField.getText();
+		if(message != null && !message.isEmpty()){
+			System.out.println("");
+			client.socketHandler.sendText(message);
+		}
+	}
+	
+	public void sendDelCmd(){
+		client.socketHandler.sendText("Delete " + deleteField.getText());
 	}
 	
 	//Used to preface messages with the user supplied by spawning new ChatGUI in client
 	public String getUser(){
 		return user;
 	}
-	
-	public String getDelMsg(){
-		return deleteField.getText();
-		
-	}
-	
-	//Method used to create and start a new thread using Sender, called on button click or 'enter'
-	public void runSendThread() throws IOException{
-		Thread senderThread = new Thread(new Sender(this,sock));
-		senderThread.start();
-	}
-	
-	public void runDelThread() throws IOException{
-		Thread delThread = new Thread(new AdminDelete(isAdmin, this, sock));
-		delThread.start();
-	}
-}
-
-class AdminDelete implements Runnable{
-	boolean isAdmin;
-	ChatGUI cgi;
-	Socket sock;
-	PrintWriter pw;
-	AdminDelete(boolean isAdmin, ChatGUI cgi, Socket sock){
-		this.isAdmin=isAdmin;
-		this.cgi=cgi;
-		this.sock=sock;
-	}
-	public void run(){
-		try{
-			pw=new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-			String delMsg = "Delete "+cgi.getDelMsg();
-			pw.println(delMsg);
-			pw.flush();
-		}catch(IOException e){
-			e.printStackTrace();
-		}
-	}
-}
-
-class Sender implements Runnable {
-	ChatGUI cgi;
-	Socket sock;
-	PrintWriter pw;
-	Sender(ChatGUI cgi, Socket sock){
-		this.cgi=cgi;
-		this.sock=sock;
-	}
-	//Does the message formatting and sending action
-	//cgi is used for getter methods, sock is used for traffic
-	public void run(){
-			try {
-				pw = new PrintWriter(new BufferedOutputStream(sock.getOutputStream()));
-				String st = cgi.getMessage();
-				System.out.println(st);
-				pw.println(st);
-				pw.flush();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-	}
-	
-	
 }

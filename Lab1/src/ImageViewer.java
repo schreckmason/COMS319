@@ -29,6 +29,7 @@ public class ImageViewer extends JFrame {
 	
 ImageViewer(String username) throws IOException{
 	user=username;
+	
 	setTitle(user+" Image Selector");
 	setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -91,6 +92,7 @@ public static File getSelectedFileWithExtension(JFileChooser c) {
         String[] exts = ((FileNameExtensionFilter)c.getFileFilter()).getExtensions();
         String nameLower = file.getName().toLowerCase();
         for (String ext : exts) { // check if it already has a valid extension
+        	System.out.println(ext);
             if (nameLower.endsWith('.' + ext.toLowerCase())) {
                 return file; // if yes, return as-is
             }

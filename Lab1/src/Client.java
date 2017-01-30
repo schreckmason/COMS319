@@ -1,20 +1,19 @@
-import java.net.*;
-import java.util.Scanner;
+import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.Socket;
 
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-import java.awt.EventQueue;
-import java.io.*;
-
-public class Client implements Runnable
+public class Client implements MessageHandler
 {
 	private Socket socket = null;
 	private Thread listenerThread;
 	private String username;
 	private ChatGUI chatGui;
-	private PrintWriter pw;
+	SocketHandler socketHandler;
 	
 
 	public Client(String ipAddr, String username, int serverPort)
@@ -23,74 +22,33 @@ public class Client implements Runnable
 		try
 		{
 			socket = new Socket(ipAddr, serverPort);
-			pw = new PrintWriter(new BufferedOutputStream(socket.getOutputStream()));
-			listenerThread = new Thread(new MessageListener(socket, this));
+			socketHandler = new SocketHandler(socket, this);
+			listenerThread = new Thread(socketHandler);
 			listenerThread.start();
-			start();
+			
+			chatGui = new ChatGUI(username, this);
+			chatGui.setVisible(true);
+			
+			authClient();
 		} catch (Exception e)
 		{
 			JOptionPane.showMessageDialog(new JFrame(), "Unknown Host " + e.getMessage());
-			System.exit(1);
+			System.exit(-1);
 		}
 	}
-
-	public void run()
-	{
-		//TODO check for a new message, once we receive it, steamOut will send it to the server
-		//frame.getMessage();
-	}
 	
-
-	public synchronized void handleChat(String msg)
-	{
-		//TODO
-		chatGui.recieveMessage(msg);
-	}
-
-	public void start() throws IOException
-	{
-		//depending on option, open up image GUI or message GUI
-	
-		chatGui = new ChatGUI(username, socket);
-		chatGui.setVisible(true);
-		authClient();
-		//addThread(socket);
-	}
-	
-	//Method to send solely the clients user to the server on start doesn't require input
+	//Method to send solely the client's user to the server on start doesn't require input
 	public void authClient() throws IOException{
-		pw.println(username);
-		System.out.println("Sending name: " + username);
-		pw.flush();
+		socketHandler.sendText(username);
 	}
 	
-	public void handleMessage(String msg){
-		chatGui.recieveMessage(msg);
+	@Override
+	public void imageReceived(SocketHandler sh, BufferedImage image) {
+		// Not implemented because Server can't currently send images
 	}
-	
-	// Start of nested class 
-	class MessageListener implements Runnable{
-		
-		Scanner in;
-		Client client;
-		
-		private MessageListener(Socket sock, Client client) {
-			try {
-				in = new Scanner(new BufferedInputStream(sock.getInputStream()));
-			} catch (IOException e) {
-				System.out.println("Error reading from socket.");
-			}
-			this.client = client;
-		}
-		
-		@Override
-		public void run() {
-			while(true){
-				System.out.println("Waiting for message from server.");
-				String msg = in.nextLine();
-				System.out.println("Received: " + msg);
-				client.handleMessage(msg);
-			}
-		}
+
+	@Override
+	public void textReceived(SocketHandler sh, String received) {
+		chatGui.recieveMessage(received);
 	}
 }

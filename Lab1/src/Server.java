@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.awt.image.BufferedImage;
 import java.io.*;
 
-public class Server implements MessageHandler, AuthentificationHandler {
+public class Server implements MessageHandler, AuthentificationHandler{
 	private int msgCnt = 0;
 	private ServerSocket serverSocket = null;
 	private File logFile = new File("chat.txt");
@@ -30,6 +30,10 @@ public class Server implements MessageHandler, AuthentificationHandler {
 		} catch (IOException ioe) {
 			System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
 		}
+	}
+
+	public static void main(String args[]) {
+		new Server(1222);
 	}
 
 	private void acceptClients() {
@@ -86,12 +90,11 @@ public class Server implements MessageHandler, AuthentificationHandler {
 	// logs message to the log file with the following format: Author # message
 	// needs to use class variables of logFile and msgCnt
 	public void logMessage(String message, String author) {
-		System.out.println("trying to log");
 		try {
 			// Open log file, append, and close
 			System.out.println(Thread.currentThread().getName());
 			PrintWriter logWriter = new PrintWriter(new FileWriter(logFile, true));
-			logWriter.println(msgCnt + " " + author + " " + message);
+			logWriter.println(msgCnt + " " + author + ": " + message);
 			logWriter.close();
 		} catch (IOException e) {
 			System.out.println("Encountered problem logging to chat.txt");
@@ -146,12 +149,9 @@ public class Server implements MessageHandler, AuthentificationHandler {
 		return result;
 	}
 
-	public static void main(String args[]) {
-		Server server = new Server(1222);
-	}
-
 	@Override
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
+		System.out.println("Image received");
 		// TODO: Maybe call text received with image name then save image
 	}
 
@@ -171,7 +171,8 @@ public class Server implements MessageHandler, AuthentificationHandler {
 	public boolean isAdmin(String name){
 		return name.toUpperCase().equals("ADMIN");
 	}
-	
+
+	// Called by one of this Server's SocketHandlers
 	@Override
 	public void authenticated(ClientHandler ch) {
 		if (isAdmin(ch.clientName)) {
@@ -179,6 +180,17 @@ public class Server implements MessageHandler, AuthentificationHandler {
 			System.out.println("Reading log to admin");
 			ch.sendText(readLogToString());
 		}
+	}
+	
+	// Called by one of this Server's SocketHandlers
+	@Override
+	public void disconnect(ClientHandler ch) {
+		try {
+			ch.socket.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		clients.remove(ch);
 	}
 }
 
@@ -209,5 +221,6 @@ class ClientHandler extends SocketHandler {
 			System.exit(-1);
 		}
 		super.run();
+		authHandler.disconnect(this);
 	}
 }

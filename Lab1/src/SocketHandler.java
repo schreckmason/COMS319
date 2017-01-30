@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import javax.imageio.ImageIO;
 
@@ -52,28 +53,28 @@ public class SocketHandler implements Runnable{
 		}
 	}
 
-	public void listenForMessages(){
+	public void listenForMessages() throws ClassNotFoundException, IOException{
 		while(!socket.isClosed()){
-			try {
-				Object received = in.readObject();
-				if(received instanceof String){
-					msgHandler.textReceived(this, (String) received);
-				} else if(received instanceof byte[]) {
-					BufferedImage image = ImageIO.read(new ByteArrayInputStream((byte[]) received));
-					msgHandler.imageReceived(this, image);
-				} else {
-					throw new Exception("Illegal message received.");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(-1);
+			Object received;
+			received = in.readObject();
+			if(received instanceof String){
+				msgHandler.textReceived(this, (String) received);
+			} else if(received instanceof byte[]) {
+				BufferedImage image = ImageIO.read(new ByteArrayInputStream((byte[]) received));
+				msgHandler.imageReceived(this, image);
+			} else {
+				throw new IOException("Illegal message received.");
 			}
 		}
 	}
 
 	@Override
 	public void run() {
-		listenForMessages();
+		try {
+			listenForMessages();
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 
