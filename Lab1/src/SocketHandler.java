@@ -39,6 +39,8 @@ public class SocketHandler implements Runnable{
 	
 	public void sendImage(File imageFile){
 		try {
+			sendText("incoming_image " + imageFile.getName());
+			
 			// Read local file into a BufferedImage variable
 			BufferedImage image = ImageIO.read(imageFile);
 			// Convert BufferedImage to byte[]
