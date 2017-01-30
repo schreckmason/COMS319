@@ -2,15 +2,14 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
-
+import java.awt.image.BufferedImage;
 import java.io.*;
 
-public class Server
+public class Server implements MessageHandler
 {
-
+	private SocketHandler socketHandler;
 	private int msgCnt = 0;
 	private ServerSocket serverSocket = null;
-	private Thread mainThread = null;
 	private File logFile = new File("chat.txt");
 	private PrintWriter writer;
 	private ServerGUI frame;
@@ -19,16 +18,19 @@ public class Server
 
 	public Server(int port)
 	{
-		//TODO Binding and starting server
 		try
 		{
 			System.out.println("Binding to port " + port + ", please wait  ...");
 			serverSocket = new ServerSocket(port);
 			System.out.println("Server started: " + serverSocket);
+			
+			
 			clients = new ArrayList<>();
+			
 			frame = new ServerGUI(this);
 			frame.setVisible(true);
-			acceptClients();
+			
+			acceptClients();//TODO: Happening in main thread; Should we change that?
 		} catch (IOException ioe)
 		{
 			System.out.println("Can not bind to port " + port + ": " + ioe.getMessage());
@@ -153,10 +155,22 @@ public class Server
 	{
 		Server server = new Server(1222);
 	}
+
+	@Override
+	public void imageReceived(BufferedImage image) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void textReceived(String received) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 //'Listens' for messages from the client
-class ClientHandler implements Runnable {
+class ClientHandler extends SocketHandler {
 	Server serv;
 	Socket s;
 	String name;
@@ -164,7 +178,8 @@ class ClientHandler implements Runnable {
 	Scanner in;
 	PrintWriter out;
 	
-	ClientHandler(Server serv, Socket s){
+	ClientHandler(Socket s, MessageHandler mh){
+		super(s, mh);
 		this.s=s;
 		this.serv=serv;
 		this.name = ""; //Empty string represents no name yet
