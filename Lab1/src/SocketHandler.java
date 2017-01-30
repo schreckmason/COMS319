@@ -10,10 +10,10 @@ import java.net.Socket;
 import javax.imageio.ImageIO;
 
 public class SocketHandler implements Runnable{
-	private Socket socket;
-	private ObjectInputStream in;
-    private ObjectOutputStream out;
-	private MessageHandler msgHandler;
+	protected Socket socket;
+	protected ObjectInputStream in;
+    protected ObjectOutputStream out;
+	protected MessageHandler msgHandler;
 	
 	public SocketHandler(Socket s, MessageHandler mh){
 		this.socket = s;

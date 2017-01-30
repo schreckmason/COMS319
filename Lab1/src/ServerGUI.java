@@ -27,7 +27,6 @@ public class ServerGUI extends JFrame
 	private JPanel contentPane;
 	private JTextField textField,textField2;
 	private JTextArea chatArea;
-	private String username = "Admin";
 	
 	private volatile boolean newMessage = false; 
 	private String message;
@@ -170,35 +169,34 @@ public class ServerGUI extends JFrame
 		contentPane.add(scrollBar);
 	}
 	
-	public String getMessage(String in)
-	{
-		//poll for a new message
-		while(!newMessage)
-		{
-			try
-			{
-				Thread.sleep(1);
-				if(!in.equals("")){
-					newMessage=true;
-				}
-			} catch (InterruptedException e)
-			{
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		
-		//new message 
-		newMessage = false;
-		return message;
-	}
+//	public String getMessage(String in)
+//	{
+//		//poll for a new message
+//		while(!newMessage)
+//		{
+//			try
+//			{
+//				Thread.sleep(1);
+//				if(!in.equals("")){
+//					newMessage=true;
+//				}
+//			} catch (InterruptedException e)
+//			{
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//		}
+//		
+//		//new message 
+//		newMessage = false;
+//		return message;
+//	}
 	
 	public void recieveMessage(String message)
 	{
 		//new message received 
 		EventQueue.invokeLater(new Runnable()
 		{
-			
 			@Override
 			public void run()
 			{
