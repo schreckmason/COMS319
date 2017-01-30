@@ -37,7 +37,7 @@ public class SocketHandler implements Runnable{
 		}
 	}
 	
-	public void sendImage(File imageFile) throws InterruptedException{
+	public void sendImage(File imageFile){
 		try {
 			// Read local file into a BufferedImage variable
 			BufferedImage image = ImageIO.read(imageFile);

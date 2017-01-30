@@ -10,10 +10,10 @@ import javax.swing.JOptionPane;
 public class Client implements MessageHandler
 {
 	private Socket socket = null;
-	private Thread listenerThread;
 	private String username;
 	private ChatGUI chatGui;
 	SocketHandler socketHandler;
+	private Thread listenerThread;
 	
 
 	public Client(String ipAddr, String username, int serverPort)

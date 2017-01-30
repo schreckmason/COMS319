@@ -3,6 +3,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.imageio.ImageIO;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 
@@ -13,6 +15,7 @@ public class Server implements MessageHandler, AuthentificationHandler{
 	private ServerGUI frame;
 	private Thread guiMessageThread;
 	private ArrayList<ClientHandler> clients;
+	private String imageName = "NOT_SET";
 
 	public Server(int port) {
 		try {
@@ -152,7 +155,13 @@ public class Server implements MessageHandler, AuthentificationHandler{
 	@Override
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
 		System.out.println("Image received");
-		// TODO: Maybe call text received with image name then save image
+		try {
+			ImageIO.write(image, "jpg", new File(imageName));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		//TODO: Log file name
+		//TODO: Save file with <sender’s name>+<received time>
 	}
 
 	@Override
@@ -163,6 +172,8 @@ public class Server implements MessageHandler, AuthentificationHandler{
 			System.out.print("trying to delete");
 			// Message format: Delete #
 			deleteLine(Integer.parseInt(received.substring(7)));
+		} else if(received.startsWith("incoming_image ")){
+			imageName = received.substring(15);
 		} else {
 			messageReceived(ch.clientName, received);
 		}
