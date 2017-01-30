@@ -6,14 +6,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import javax.imageio.ImageIO;
 
 public class SocketHandler implements Runnable{
-	private Socket socket;
-	private ObjectInputStream in;
-    private ObjectOutputStream out;
-	private MessageHandler msgHandler;
+	protected Socket socket;
+	protected ObjectInputStream in;
+    protected ObjectOutputStream out;
+	protected MessageHandler msgHandler;
 	
 	public SocketHandler(Socket s, MessageHandler mh){
 		this.socket = s;
@@ -36,8 +37,10 @@ public class SocketHandler implements Runnable{
 		}
 	}
 	
-	public void sendImage(File imageFile) throws InterruptedException{
+	public void sendImage(File imageFile){
 		try {
+			sendText("incoming_image " + imageFile.getName());
+			
 			// Read local file into a BufferedImage variable
 			BufferedImage image = ImageIO.read(imageFile);
 			// Convert BufferedImage to byte[]
@@ -52,28 +55,28 @@ public class SocketHandler implements Runnable{
 		}
 	}
 
-	public void listenForMessages(){
+	public void listenForMessages() throws ClassNotFoundException, IOException{
 		while(!socket.isClosed()){
-			try {
-				Object received = in.readObject();
-				if(received instanceof String){
-					msgHandler.textReceived(this, (String) received);
-				} else if(received instanceof byte[]) {
-					BufferedImage image = ImageIO.read(new ByteArrayInputStream((byte[]) received));
-					msgHandler.imageReceived(this, image);
-				} else {
-					throw new Exception("Illegal message received.");
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.exit(-1);
+			Object received;
+			received = in.readObject();
+			if(received instanceof String){
+				msgHandler.textReceived(this, (String) received);
+			} else if(received instanceof byte[]) {
+				BufferedImage image = ImageIO.read(new ByteArrayInputStream((byte[]) received));
+				msgHandler.imageReceived(this, image);
+			} else {
+				throw new IOException("Illegal message received.");
 			}
 		}
 	}
 
 	@Override
 	public void run() {
-		listenForMessages();
+		try {
+			listenForMessages();
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
 
