@@ -55,6 +55,12 @@ public class ImageViewer extends JFrame {
 		chatArea.setBounds(380, 50, 167, 108);
 		chatArea.setLineWrap(true);
 		contentPane.add(chatArea);
+		
+		JScrollPane scrollBar = new JScrollPane(chatArea);
+		scrollBar.setLocation(380, 50);
+		scrollBar.setSize(167,108);
+		scrollBar.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		contentPane.add(scrollBar);
 
 		JFileChooser fc = new JFileChooser();
 		FileNameExtensionFilter filter = new FileNameExtensionFilter("JPG Images", "jpg");
@@ -77,7 +83,10 @@ public class ImageViewer extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				imageClient.socketHandler.sendImage(imgFile);
-				receiveMessage(user + ": " + imgFile.getName());
+
+				if(!user.toUpperCase().equals("ADMIN")){
+					receiveMessage(user + ": (image \"" + imgFile.getName() + "\")");
+				}
 			}
 		});
 	}

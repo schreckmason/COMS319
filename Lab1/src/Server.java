@@ -21,7 +21,6 @@ public class Server implements MessageHandler, AuthentificationHandler {
 	private ServerGUI frame;
 	private Thread guiMessageThread;
 	private ArrayList<ClientHandler> clients;
-	private String imageName = "NOT_SET";
 
 	public Server(int port) {
 		try {
@@ -161,22 +160,23 @@ public class Server implements MessageHandler, AuthentificationHandler {
 	@Override
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
 		System.out.println("Image received");
+		ClientHandler ch = ((ClientHandler) sh);
 		try {
 			String destPathName = "./images/";
 			File destPath = new File(destPathName);
-			if(!destPath.exists()){
+			if (!destPath.exists()) {
 				destPath.mkdirs();
 				System.out.println(destPath.getPath());
 			}
 			String timeString = new SimpleDateFormat("MM-dd-yy(HH;mm;ss)").format(Calendar.getInstance().getTime());
-			String destFileName = ((ClientHandler) sh).clientName;
-			destFileName += " " + timeString + ".jpg";
+			String destFileName = ch.clientName + " " + timeString + ".jpg";
 			destFileName = destPathName + destFileName;
-			System.out.println(destFileName);
 			File destFile = new File(destFileName);
 			ImageIO.write(image, "jpg", destFile);
-			
-			textReceived(sh, destFile.getName());
+
+			System.out.println("Saving image \"" + ch.imageName + "\" from " + ch.clientName + " as \""
+					+ destFile.getName() + "\"");
+			textReceived(sh, "(image \"" + ch.imageName + "\")");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -186,12 +186,12 @@ public class Server implements MessageHandler, AuthentificationHandler {
 	public void textReceived(SocketHandler sh, String received) {
 		// TODO: See if additions needed here
 		ClientHandler ch = (ClientHandler) sh;
-		if (received.startsWith("Delete ") && ch.clientName.toUpperCase().equals("ADMIN")) {
+		if (received.startsWith("Delete ") && isAdmin(ch.clientName)) {
 			System.out.print("trying to delete");
 			// Message format: Delete #
 			deleteLine(Integer.parseInt(received.substring(7)));
 		} else if (received.startsWith("incoming_image ")) {
-			imageName = received.substring(15);
+			ch.imageName = received.substring(15);
 		} else {
 			messageReceived(ch.clientName, received);
 		}
@@ -227,6 +227,7 @@ public class Server implements MessageHandler, AuthentificationHandler {
 class ClientHandler extends SocketHandler {
 	public String clientName;
 	protected AuthentificationHandler authHandler;
+	public String imageName = "";
 
 	ClientHandler(Socket s, MessageHandler mh, AuthentificationHandler ah) {
 		super(s, mh);
