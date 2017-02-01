@@ -1,14 +1,20 @@
-import java.net.*;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-
-public class Server implements MessageHandler, AuthentificationHandler{
+public class Server implements MessageHandler, AuthentificationHandler {
 	private int msgCnt = 0;
 	private ServerSocket serverSocket = null;
 	private File logFile = new File("chat.txt");
@@ -156,30 +162,42 @@ public class Server implements MessageHandler, AuthentificationHandler{
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
 		System.out.println("Image received");
 		try {
-			ImageIO.write(image, "jpg", new File(imageName));
+			String destPathName = "./images/";
+			File destPath = new File(destPathName);
+			if(!destPath.exists()){
+				destPath.mkdirs();
+				System.out.println(destPath.getPath());
+			}
+			String timeString = new SimpleDateFormat("MM-dd-yy(HH;mm;ss)").format(Calendar.getInstance().getTime());
+			String destFileName = ((ClientHandler) sh).clientName;
+			destFileName += " " + timeString + ".jpg";
+			destFileName = destPathName + destFileName;
+			System.out.println(destFileName);
+			File destFile = new File(destFileName);
+			ImageIO.write(image, "jpg", destFile);
+			
+			textReceived(sh, destFile.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//TODO: Log file name
-		//TODO: Save file with <sender’s name>+<received time>
 	}
 
 	@Override
 	public void textReceived(SocketHandler sh, String received) {
-		//TODO: See if additions needed here
+		// TODO: See if additions needed here
 		ClientHandler ch = (ClientHandler) sh;
 		if (received.startsWith("Delete ") && ch.clientName.toUpperCase().equals("ADMIN")) {
 			System.out.print("trying to delete");
 			// Message format: Delete #
 			deleteLine(Integer.parseInt(received.substring(7)));
-		} else if(received.startsWith("incoming_image ")){
+		} else if (received.startsWith("incoming_image ")) {
 			imageName = received.substring(15);
 		} else {
 			messageReceived(ch.clientName, received);
 		}
 	}
-	
-	public boolean isAdmin(String name){
+
+	public boolean isAdmin(String name) {
 		return name.toUpperCase().equals("ADMIN");
 	}
 
@@ -192,7 +210,7 @@ public class Server implements MessageHandler, AuthentificationHandler{
 			ch.sendText(readLogToString());
 		}
 	}
-	
+
 	// Called by one of this Server's SocketHandlers
 	@Override
 	public void disconnect(ClientHandler ch) {

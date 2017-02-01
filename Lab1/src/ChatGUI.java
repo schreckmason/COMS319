@@ -149,6 +149,9 @@ public class ChatGUI extends JFrame
 		if(message != null && !message.isEmpty()){
 			System.out.println("");
 			client.socketHandler.sendText(message);
+			if(!getUser().toUpperCase().equals("ADMIN")){
+				recieveMessage(getUser() + ": " + message);
+			}
 		}
 	}
 	
