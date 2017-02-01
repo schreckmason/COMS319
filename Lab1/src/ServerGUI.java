@@ -101,8 +101,8 @@ public class ServerGUI extends JFrame
 			@Override
 			public void actionPerformed(ActionEvent e)
 			{
-	
-				
+				String deleteTxt = textField2.getText();
+				server.deleteLine(Integer.parseInt(deleteTxt.substring(7)));
 			}
 		});
 		//allow for hitting enter to send a chat message

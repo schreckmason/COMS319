@@ -1,21 +1,26 @@
-import java.net.*;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.Scanner;
+import java.util.Calendar;
 
 import javax.imageio.ImageIO;
 
-import java.awt.image.BufferedImage;
-import java.io.*;
-
-public class Server implements MessageHandler, AuthentificationHandler{
+public class Server implements MessageHandler, AuthentificationHandler {
 	private int msgCnt = 0;
 	private ServerSocket serverSocket = null;
 	private File logFile = new File("chat.txt");
 	private ServerGUI frame;
 	private Thread guiMessageThread;
 	private ArrayList<ClientHandler> clients;
-	private String imageName = "NOT_SET";
 
 	public Server(int port) {
 		try {
@@ -155,31 +160,44 @@ public class Server implements MessageHandler, AuthentificationHandler{
 	@Override
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
 		System.out.println("Image received");
+		ClientHandler ch = ((ClientHandler) sh);
 		try {
-			ImageIO.write(image, "jpg", new File(imageName));
+			String destPathName = "./images/";
+			File destPath = new File(destPathName);
+			if (!destPath.exists()) {
+				destPath.mkdirs();
+				System.out.println(destPath.getPath());
+			}
+			String timeString = new SimpleDateFormat("MM-dd-yy(HH;mm;ss)").format(Calendar.getInstance().getTime());
+			String destFileName = ch.clientName + " " + timeString + ".jpg";
+			destFileName = destPathName + destFileName;
+			File destFile = new File(destFileName);
+			ImageIO.write(image, "jpg", destFile);
+
+			System.out.println("Saving image \"" + ch.imageName + "\" from " + ch.clientName + " as \""
+					+ destFile.getName() + "\"");
+			textReceived(sh, "(image \"" + ch.imageName + "\")");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//TODO: Log file name
-		//TODO: Save file with <sender’s name>+<received time>
 	}
 
 	@Override
 	public void textReceived(SocketHandler sh, String received) {
-		//TODO: See if additions needed here
+		// TODO: See if additions needed here
 		ClientHandler ch = (ClientHandler) sh;
-		if (received.startsWith("Delete ") && ch.clientName.toUpperCase().equals("ADMIN")) {
+		if (received.startsWith("Delete ") && isAdmin(ch.clientName)) {
 			System.out.print("trying to delete");
 			// Message format: Delete #
 			deleteLine(Integer.parseInt(received.substring(7)));
-		} else if(received.startsWith("incoming_image ")){
-			imageName = received.substring(15);
+		} else if (received.startsWith("incoming_image ")) {
+			ch.imageName = received.substring(15);
 		} else {
 			messageReceived(ch.clientName, received);
 		}
 	}
-	
-	public boolean isAdmin(String name){
+
+	public boolean isAdmin(String name) {
 		return name.toUpperCase().equals("ADMIN");
 	}
 
@@ -192,7 +210,7 @@ public class Server implements MessageHandler, AuthentificationHandler{
 			ch.sendText(readLogToString());
 		}
 	}
-	
+
 	// Called by one of this Server's SocketHandlers
 	@Override
 	public void disconnect(ClientHandler ch) {
@@ -209,6 +227,7 @@ public class Server implements MessageHandler, AuthentificationHandler{
 class ClientHandler extends SocketHandler {
 	public String clientName;
 	protected AuthentificationHandler authHandler;
+	public String imageName = "";
 
 	ClientHandler(Socket s, MessageHandler mh, AuthentificationHandler ah) {
 		super(s, mh);

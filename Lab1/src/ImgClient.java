@@ -42,14 +42,11 @@ public class ImgClient implements MessageHandler{
 
 	@Override
 	public void imageReceived(SocketHandler sh, BufferedImage image) {
-		// TODO Auto-generated method stub
-		
+		// Not implemented because only clients can send images
 	}
 
 	@Override
 	public void textReceived(SocketHandler sh, String received) {
-		// TODO Auto-generated method stub
-		
+		imgGUI.receiveMessage(received);
 	}
-
 }
