@@ -7,7 +7,7 @@
 
 <body>
 <h1>
-Validation Form
+Contact Form
 </h1>
 
   <form id="contact information" action="" >
@@ -16,7 +16,21 @@ Validation Form
       <p id="Email">
         <label for="email">Email</label>
         <input id="email" name="email" type="text" />
-
+      </p>
+      
+      <p id="Phone">
+          <label for="phone">Phone</label>
+          <input id="phone1" name="phone1" type="text" maxlength="3"/>
+          <label for="phone1">-</label>
+          <input id="phone2" name="phone2" type="text" maxlength="3"/>
+          <label for="phone2">-</label>
+          <input id="phone3" name="phone3" type="text" maxlength="4"/>
+      </p>
+      
+      <p id="Address">
+          <label for="address">Address</label>
+          <input id="address" name="address" type="text"/>
+          <!-- decide upon some method of input validation for both a city and state-->
       </p>
         <input onCLick="validate2()" type="button" id="continue" name="continue" value="Continue"/>
     </fieldset>

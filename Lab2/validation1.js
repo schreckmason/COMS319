@@ -13,13 +13,11 @@ function validate1(){
    
    //This links to the next document of contact information note we might need a delay here to give the user time to see the correct or wrong images displayed
    if(firstCheck(document.forms["personalInfo"]["firstName"]) && lastCheck(document.forms["personalInfo"]["lastName"]) && genderCheck(document.forms["personalInfo"]["gender"])
-      && stateCheck(document.forms["personalInfo"]["state"])){
-    //Need a delay here or fix logic to see images
+     && stateCheck(document.forms["personalInfo"]["state"])){
+   //Need a delay here or fix logic to see images
         window.location.href = "./validation2.html";
       }
-      else{
-        location.reload(false);
-      }
+
 }
 
 
