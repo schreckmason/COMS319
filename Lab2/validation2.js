@@ -78,7 +78,7 @@ function addressCheck(address){
     if(typeof(Storage)!=="undefined"){
         //Store variables
         localStorage.setItem("city", cityOrigin);
-        localStorage.setItem("state",stateOrigin.toUpperCase());
+        localStorage.setItem("state2",stateOrigin.toUpperCase());
     }
     
     if(address!=null){
