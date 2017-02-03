@@ -16,13 +16,9 @@ function validate1(){
       var img = getImage(success, id);
       document.getElementById(id).appendChild(img);
    });
-   
-   if(allPassed){
-      //proceed after 1.5 seconds
-      setTimeout(function() {
-         localStorage.setItem("state1",tateOrigin.toUpperCase());
-         window.location.href = "./validation2.html";
-      }, 1500);
+   if(allPassed){ window.location.href="./validation2.html";}
+   if(typeof(Storage)!=="undefined"){
+    localStorage.setItem("state",stateCheck(getSelection(document.forms["personalInfo"]["state"])));
    }
 
 }
