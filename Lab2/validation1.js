@@ -1,63 +1,58 @@
 function validate1(){
-    var image1=getImage(firstCheck(document.forms["personalInfo"]["firstName"]),"First Name");
-    document.getElementById("First Name").appendChild(image1)
+   // String id, function checker, String val
+   var checks = [
+   ["First Name", alphaNumCheck, document.forms["personalInfo"]["firstName"].value],
+   ["Last Name", alphaNumCheck, document.forms["personalInfo"]["lastName"].value],
+   ["Gender", genderCheck, getSelection(document.forms["personalInfo"]["gender"])],
+   ["State", stateCheck, getSelection(document.forms["personalInfo"]["state"])]];
    
-   image1=getImage(lastCheck(document.forms["personalInfo"]["lastName"]),"Last Name");
-   document.getElementById("Last Name").appendChild(image1);
+   var allPassed = true;
+   checks.forEach(function(arr){
+      var id = arr[0];
+      var func = arr[1];
+      var val = arr[2];
+      var success = func(val);
+      allPassed &= success;
+      var img = getImage(success, id);
+      document.getElementById(id).appendChild(img);
+   });
    
-   image1=getImage(genderCheck(document.forms["personalInfo"]["gender"]),"Gender");
-   document.getElementById("Gender").appendChild(image1);
-   
-   image1=getImage(stateCheck(document.forms["personalInfo"]["state"]),"State");
-   document.getElementById("State").appendChild(image1);
-   
-   //This links to the next document of contact information note we might need a delay here to give the user time to see the correct or wrong images displayed
-   if(firstCheck(document.forms["personalInfo"]["firstName"]) && lastCheck(document.forms["personalInfo"]["lastName"]) && genderCheck(document.forms["personalInfo"]["gender"])
-      && stateCheck(document.forms["personalInfo"]["state"])){
-    //Need a delay here or fix logic to see images
-        window.location.href = "./validation2.html";
-      }
-      else{
-        location.reload(false);
-      }
+   if(allPassed){
+      //proceed after 1.5 seconds
+      setTimeout(function() {
+         localStorage.setItem("state1",tateOrigin.toUpperCase());
+         window.location.href = "./validation2.html";
+      }, 1500);
+   }
+
 }
 
+function getSelection(e){
+   return e.options[e.selectedIndex].value;
+}
 
-//Function that will return green check if true, red x if otherwisre
+//Function that will return green check if true, red x if otherwise
 function getImage(bool, ID){
-    var image=document.getElementById("image"+ID);
+    var image=document.getElementById("image "+ID);
     if(image==null){
         image=new Image(15,15);
-        image.id="image"+ID;
+        image.id="image "+ID;
     }
     image.src=bool ? './correct.png' : './wrong.png'
     return image;
 }
 
-function firstCheck(firstName){
-    //Don't need to check for blank box, implicit check for that in length check
-    if(firstName.value.length<2){
-        return false;
-    }
-    return true;
-}
-
-function lastCheck(lastName){
-    //Don't need to check for blank box, implicit check for that in length check
-    if(lastName.value.length<2){
-        return false;
-    }
-    return true;
+function alphaNumCheck(entry) {
+    let regex = /^[a-z0-9]+$/i; // 1 or more alphanumeric character (nothing else)
+    var success = entry != null && entry.match(regex) != null;
+    return success;
 }
 
 function genderCheck(gender){
-    return gender.options[gender.selectedIndex].value=="male" || gender.options[gender.selectedIndex].value=="female" ? true : false;
-
+    return ['male', 'female'].includes(gender);
 }
 
 function stateCheck(state){
-    return state.options[state.selectedIndex].value=="ca" || state.options[state.selectedIndex].value=="fl" || state.options[state.selectedIndex].value=="ny" ||
-        state.options[state.selectedIndex].value=="tx" || state.options[state.selectedIndex].value=="hi" || state.options[state.selectedIndex].value=="wa" ||
-        state.options[state.selectedIndex].value=="co" || state.options[state.selectedIndex].value=="va" || state.options[state.selectedIndex].value=="ia" ||
-        state.options[state.selectedIndex].value=="az" ? true : false;
+   var states = ["ca", "fl", "ny", "tx", "hi", "wa", "co", "va", "ia", "az"];
+   return states.includes(state);
 }
