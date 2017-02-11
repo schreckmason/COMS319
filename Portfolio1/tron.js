@@ -61,26 +61,49 @@ function animationDraw(){
 function advancePlayer(player){
    if(player.alive){
       var pos0 = [player.position[0], player.position[1]];
-      player.forward(1);
-      checkCollision(player.position);
-      erasePlayer(pos0);
+      player.forward(2);
+      if(checkCollision(player.position)){
+         player.alive = false;
+         console.log("Collided");
+      }
+      
+      ctx.beginPath();
       ctx.strokeStyle = player.color;
-      console.log(player.getInfo());
-      drawPlayer(player.position);
       ctx.moveTo(pos0[0], pos0[1]);
       ctx.lineTo(player.position[0], player.position[1]);
       ctx.stroke();
    }
 }
 
-function drawPlayer(position){
-   ctx.fillRect(position[0]-2, position[1]-2, 4, 4);
-}
-function erasePlayer(position){
-   ctx.clearRect(position[0]-2, position[1]-2, 4, 4);
-}
-function checkCollision(position){
+//decided against using shapes for players for now to simplify collision/drawing logic
+// function drawPlayer(position){
+   // var temp = ctx.globalAlpha;
+   // ctx.globalAlpha = 0.5;
+   // ctx.fillRect(position[0]-2, position[1]-2, 4, 4);
+   // ctx.globalAlpha = temp;
+// }
+// function erasePlayer(position){
    
+   // ctx.clearRect(position[0]-2, position[1]-2, 4, 4);
+// }
+function checkCollision(position){
+   var collision = false;
+   var x = position[0];
+   var y = position[1];
+   var xMax = canvas.width;
+   var yMax = canvas.height;
+   
+   if(x>xMax || y>yMax || x<0 || y<0){
+      collision = true;
+   } else {
+      var imgData = ctx.getImageData(x-1, y-1, 2, 2);
+      console.log(imgData.data);
+      for(var i = 0; i<imgData.data.length; i+=4){
+         var alpha = imgData.data[i+3];
+         collision |= (alpha == 255)
+      }
+   }
+   return collision;
 }
 
 function test1(){
@@ -101,23 +124,21 @@ function downAll(){
 }
 function test21(p1, p2){console.log(p1.getInfo() + '\n' + p2.getInfo());}
 function test2(){
-   var player1 = new Player("Drake");
-   var player2 = new Player("Mason");
-   player1.color = 0x00FF00; //change attributes
-   test21(player1, player2);
-   player1.right();
-   test21(player1, player2);
-   player1.left();//shouldn't change
-   test21(player1, player2);
-   player1.down();
-   player2.left();
-   test21(player1, player2);
-   player1.left();
-   test21(player1, player2);
+   ctx.strokeStyle = "#FF0000";
+   ctx.moveTo(31, 41);
+   ctx.lineTo(35, 41);
+   ctx.stroke();
+   drawPlayer([31,41]);
+   // ctx.beginPath();
+   // ctx.strokeStyle = "#0000FF";
+   // ctx.moveTo(53, 58);
+   // ctx.lineTo(97, 93);
+   // ctx.stroke();
+   test3(29, 39, 6, 4);
 }
 
-function test3(){
-   console.log(ctx.getImageData(30, 40, 3, 8));
+function test3(x0, y0, x1, y1){
+   console.log(ctx.getImageData(x0, y0, x1, y1));
 }
 
 // function toggleCrawl(){
