@@ -1,15 +1,12 @@
 var socket,
-	localPlayer,
-	remotePlayers;
+  localPlayer,
+  remotePlayers;
 
 function init(){
-	socket=io.connect("ws://127.0.0.1:8000");
-	remotePlayers = [];
-	setEventHandlers();
-};
+  socket=io.connect("ws://127.0.0.1:8000");
+  remotePlayers = [];
+  setEventHandlers();
 
-
-function init(){
    raf = window.requestAnimationFrame(animationDraw);
    
    canvas = document.getElementById("myCanvas");
@@ -23,6 +20,14 @@ function init(){
    test21(players[0], players[1]);
    window.addEventListener("keydown", keyPressed, false);
 }
+
+var setEventHandlers = function() {
+socket.on("connect",onSocketConnected);
+};
+
+function onSocketConnected(){
+  console.log("Connected to server");
+};
 
 function checkCollision(position){
    var collision = false;
