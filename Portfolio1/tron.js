@@ -22,36 +22,30 @@ Could talk about requestAnimationFrame as new/complex
 
 /*                                     START OF PLAYER DEFINITION                               */
 // Define Player "class"
-function Player (name, color, direction, position) {
-   this.name = name;//"Drake";
-   this.color = color;//"#FF0000"; // red
-   this.direction = direction;//1;// 0:left, 1:up, 2:right, 3:down
-   this.position = position;//[0, 0];
-   this.alive = true;
-}
-// Player "public" functions
-Player.prototype.right  = function(){this.turn(2);};
-Player.prototype.left   = function(){this.turn(0);};
-Player.prototype.up     = function(){this.turn(1);};
-Player.prototype.down   = function(){this.turn(3);};
-
-// testing function
-Player.prototype.getInfo = function(){
-   return this.name + ' ' + this.color + ' ' + this.direction + ' ' + this.position;
-};
-
-// Player "private"/internal functions
-Player.prototype.turn = function(dir){
-   // if not opposite current direction;
-   if(Math.abs(this.direction - dir) != 2)
-      this.direction = dir;
-};
+function Player (id, name, color, direction, position) {
+   var id = id;//number id
+   var name = name;//"Drake";
+   var color = color;//"#FF0000"; // red
+   var direction = direction;//1;// 0:left, 1:up, 2:right, 3:down
+   var position = position;//[0, 0];
+   var alive = true;
    
-Player.prototype.forward = function(pixels){
-   var dir = this.direction;
-   this.position[dir%2] += pixels * (Math.floor(dir/2)*2 - 1);
-};
-/*                                     END OF PLAYER DEFINITION                               */
+   var turn = function(dir){
+      // if not opposite current direction;
+      if(Math.abs(this.direction - dir) != 2)
+         direction = dir;
+   };
+   
+   var forward = function(pixels){
+      position[direction%2] += pixels * (Math.floor(direction/2)*2 - 1);
+   };
+   
+   //testing purposes
+   var getInfo = function(){
+      return this.name + ' ' + this.color + ' ' + this.direction + ' ' + this.position;
+   };
+}
+
 function animationDraw(){
    //ctx.clearRect(0,0, canvas.width, canvas.height);//fresh slate
    players.forEach(advancePlayer);
@@ -108,19 +102,6 @@ function checkCollision(position){
 
 function test1(){
    window.cancelAnimationFrame(raf);
-}
-
-function rightAll(){
-   players.forEach(function(player){player.right();});   
-}
-function leftAll(){
-   players.forEach(function(player){player.left();});
-}
-function upAll(){
-   players.forEach(function(player){player.up();});   
-}
-function downAll(){
-   players.forEach(function(player){player.down();});
 }
 function test21(p1, p2){console.log(p1.getInfo() + '\n' + p2.getInfo());}
 function test2(){
