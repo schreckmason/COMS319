@@ -23,4 +23,4 @@ var Player = function(name){
 
 /*
 Export for node access*/
-exports.game.client = game.client;
+exports.Player=Player;
