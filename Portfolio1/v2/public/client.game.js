@@ -6,9 +6,9 @@ var socket,
 /* ------------------------- HELPERS -------------------------*/
 function findPlayer(id){
    var i;
-   for(i=0; i<players.length;i++){
-      if(players[i].id == id)
-         return players[i];
+   for(i=0; i<remotePlayers.length;i++){
+      if(remotePlayers[i].id == id)
+         return remotePlayers[i];
    };
    return false;
 }
@@ -19,6 +19,9 @@ function init(){
    socket = io.connect("ws://127.0.0.1:8000");
    remotePlayers = [];
    localPlayer = new Player("Mason");//prompt for name
+   // state control variables
+   readyToDraw = false;
+   readyToMove = false;
    
    //start listening
    setEventHandlers();
@@ -53,7 +56,7 @@ function onInitPlayer(input){
    localPlayer.position = input.position;
    localPlayer.alive = true;
    localPlayer.prevPos = input.position;
-   localPlayer.moveDrawn = true;
+   localPlayer.moveReady = false;
    
    console.log("local player initialized: ");
    console.log(localPlayer);
@@ -75,46 +78,49 @@ function onNewPlayer(input){
 
 /* ------------------------- ANIMATION -------------------------*/
 
-function animationDraw(){
+function animateIfReady(){
+   console.log("animateIfReady: \n\tdraw: "+readyToDraw+"\n\tmove: "+readyToMove);
+   if(readyToDraw && readyToMove){
+      // remote players always move first
+      remotePlayers.forEach(function(p){
+         //don't worry about checking collision of remote players.
+         //they will check/signal their own collision
+         if(p.alive){
+            drawLine(p.prevPos, p.position, p.color);
+            p.moveReady = false;
+         }
+      });
+      
+      //now local player moves
+      var crashed = checkCollision(localPlayer.position);
+      if(crashed){
+         localPlayer.alive = false;
+         signalCrash();
+      }
+      
+      readyToDraw = false;
+      readyToDraw = false;
+      raf = window.requestAnimationFrame(animationFrameReady);
+   }
+}
+
+function animationFrameReady(){
+   console.log("animation frame ready");
+   
    //send local player move but don't draw yet
    localPlayer.forward(2);
    sendMove();
    
-   //wait for move events
-   
-   console.log("Entering potentially endless wait");
-   while(!allMoved()){
-      //wait for move events to come in
-      //TODO:not sure if this will work due to single-threading of nodjs
-   }
-   console.log("Ready to animate move");
-   
-   // remote players always move first
-   remotePlayers.forEach(function(p){
-      //don't worry about checking collision of remote players.
-      //they will check/signal their own collision
-      if(p.alive){
-         drawLine(p.prevPos, p.position, p.color);
-         p.moveDrawn = true;
-      }
-   });
-   
-   //now local player moves
-   var crashed = checkCollision(localPlayer.position);
-   if(crashed){
-      localPlayer.alive = false;
-      signalCrash();
-   }
-   
-   raf = window.requestAnimationFrame(animationDraw);
+   readyToDraw = true;
+   animateIfReady();
 }
 
 //checks if all active players have moved since last animation
 function allMoved(){
-   if(localPlayer.moveDrawn)
+   if(localPlayer.alive && !localPlayer.moveReady)
       return false;
    for(var i=0; i<remotePlayers.length;i++){
-      if(remotePlayers[i].moveDrawn)//if no move since last draw
+      if(remotePlayers[i].alive && !remotePlayers[i].moveReady)
          return false;
    };
    return true;
@@ -156,6 +162,11 @@ function onMoveEvent(input){
    console.log(input);
    //update state but no drawing here
    findPlayer(input.id).moveTo(input.position);
+   
+   if(allMoved()){
+      readyToMove = true;
+      animateIfReady();
+   }
 }
 
 //remote player collision
@@ -168,7 +179,7 @@ function onPlayerCrash(input){
 //start animating
 function onStartGame(){
    console.log("Starting game!");
-   raf = window.requestAnimationFrame(animationDraw);
+   raf = window.requestAnimationFrame(animationFrameReady);
 }
 
 //local player crash
