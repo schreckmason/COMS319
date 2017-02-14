@@ -26,7 +26,7 @@ var Player = function(name){
 
    //only used for local player
    var forward = function(pixels){
-      var newPos = this.position; 
+      var newPos = this.position.slice(); 
       newPos[this.direction%2] += pixels * (Math.floor(this.direction/2)*2 - 1);
       this.moveTo(newPos);
    };
