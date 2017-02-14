@@ -58,14 +58,14 @@ function onInitPlayer(input){
    localPlayer.prevPos = input.position;
    localPlayer.moveReady = false;
    
-   console.log("local player initialized: ");
-   console.log(localPlayer);
+   // console.log("local player initialized: ");
+   // console.log(localPlayer);
 }
 
 //remote player joined
 function onNewPlayer(input){
-   console.log("onNewPlayer: ");
-   console.log(input);
+   // console.log("onNewPlayer: ");
+   // console.log(input);
    
    rPlayer = new Player(input.name);
    rPlayer.id = input.id;
@@ -79,7 +79,7 @@ function onNewPlayer(input){
 /* ------------------------- ANIMATION -------------------------*/
 
 function animateIfReady(){
-   console.log("animateIfReady: \n\tdraw: "+readyToDraw+"\n\tmove: "+readyToMove);
+   // console.log("animateIfReady: \n\tdraw: "+readyToDraw+"\n\tmove: "+readyToMove);
    if(readyToDraw && readyToMove){
       // remote players always move first
       remotePlayers.forEach(function(p){
@@ -88,14 +88,23 @@ function animateIfReady(){
          if(p.alive){
             drawLine(p.prevPos, p.position, p.color);
             p.moveReady = false;
+         }else{
+            // console.log(p.id+" is dead");
          }
       });
-      
-      //now local player moves
-      var crashed = checkCollision(localPlayer.position);
-      if(crashed){
-         localPlayer.alive = false;
-         signalCrash();
+      console.log(localPlayer.position);
+      console.log(localPlayer.prevPos);
+      if(localPlayer.alive){
+         //now local player moves
+         var crashed = checkCollision(localPlayer.position);
+         if(crashed){
+            // console.log("crashed: " + crashed);
+            localPlayer.alive = false;
+            signalCrash();
+         }
+         drawLine(localPlayer.prevPos, localPlayer.position, localPlayer.color);
+      } else {
+         // console.log("I am dead");
       }
       
       readyToDraw = false;
@@ -105,11 +114,13 @@ function animateIfReady(){
 }
 
 function animationFrameReady(){
-   console.log("animation frame ready");
+   // console.log("animation frame ready");
    
    //send local player move but don't draw yet
-   localPlayer.forward(2);
-   sendMove();
+   if(localPlayer.alive){
+      localPlayer.forward(2);
+      sendMove();
+   }
    
    readyToDraw = true;
    animateIfReady();
@@ -128,6 +139,7 @@ function allMoved(){
 
 //draw line from iPos to fPos with given color
 function drawLine(iPos, fPos, color){
+   // console.log("drawLine: "+iPos+' '+fPos+' '+color);
    ctx.beginPath();
    ctx.strokeStyle = color;
    ctx.moveTo(iPos[0], iPos[1]);
@@ -137,6 +149,7 @@ function drawLine(iPos, fPos, color){
 
 //helper to check if grid position is okay to traverse
 function checkCollision(position){
+   // console.log("checkCollision: " + position)
    var collision = false;
    var x = position[0];
    var y = position[1];
@@ -147,7 +160,7 @@ function checkCollision(position){
       collision = true;
    } else {
       var imgData = ctx.getImageData(x-1, y-1, 2, 2);
-      console.log(imgData.data);
+      // console.log(imgData.data);
       for(var i = 0; i<imgData.data.length; i+=4){
          var alpha = imgData.data[i+3];
          collision |= (alpha == 255)
@@ -158,8 +171,8 @@ function checkCollision(position){
 
 //remote player moved
 function onMoveEvent(input){
-   console.log("onMoveEvent");
-   console.log(input);
+   // console.log("onMoveEvent");
+   // console.log(input);
    //update state but no drawing here
    findPlayer(input.id).moveTo(input.position);
    
@@ -171,26 +184,26 @@ function onMoveEvent(input){
 
 //remote player collision
 function onPlayerCrash(input){
-   console.log("onPlayerCrash");
-   console.log(input);
+   // console.log("onPlayerCrash");
+   // console.log(input);
    findPlayer(input.id).alive = false;
 }
 
 //start animating
 function onStartGame(){
-   console.log("Starting game!");
+   // console.log("Starting game!");
    raf = window.requestAnimationFrame(animationFrameReady);
 }
 
 //local player crash
 function signalCrash(){
-   console.log("I crashed!");
+   // console.log("I crashed!");
    //TODO:maybe send position of crash too?
    socket.emit("crash", {id: localPlayer.id});
 }
 
 function sendMove(){
-   console.log("Sending move");
+   // console.log("Sending move");
    socket.emit("move", {id: localPlayer.id, position: localPlayer.position});
 }
 
