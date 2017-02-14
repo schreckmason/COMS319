@@ -8,13 +8,13 @@ Player = require("./server.Player.js").Player;
 Global Variables
 */
 //constants
-colors = ["#FF0000", "#0000FF", "#008800", "#FFFF00"]
+colors = ["#FF0000", "#0000FF", "#008800", "#CC00CC"]
 directions = [0, 1, 2, 3];
 positions = [
-   [30, 30],
-   [130, 50],
-   [50, 180],
-   [200, 150]];
+   [400, 250],
+   [250, 400],
+   [100, 250],
+   [250, 100]];
 
 function initializeWorld(){
    //array of player 'class' objects
