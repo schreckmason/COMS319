@@ -92,8 +92,6 @@ function animateIfReady(){
             // console.log(p.id+" is dead");
          }
       });
-      console.log(localPlayer.position);
-      console.log(localPlayer.prevPos);
       if(localPlayer.alive){
          //now local player moves
          var crashed = checkCollision(localPlayer.position);
@@ -171,11 +169,12 @@ function checkCollision(position){
 
 //remote player moved
 function onMoveEvent(input){
-   // console.log("onMoveEvent");
-   // console.log(input);
+   console.log(input.position);
    //update state but no drawing here
-   findPlayer(input.id).moveTo(input.position);
-   
+   var player = findPlayer(input.id);
+   console.log(player.position);
+   console.log(player.prevPos);
+   player.moveTo(input.position);
    if(allMoved()){
       readyToMove = true;
       animateIfReady();
