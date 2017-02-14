@@ -1,0 +1,220 @@
+var socket,
+  localPlayer,
+  remotePlayers;
+  
+
+/* ------------------------- HELPERS -------------------------*/
+function findPlayer(id){
+   var i;
+   for(i=0; i<players.length;i++){
+      if(players[i].id == id)
+         return players[i];
+   };
+   return false;
+}
+
+/* ------------------------- SETUP -------------------------*/
+function init(){
+   //global variables
+   socket = io.connect("ws://127.0.0.1:8000");
+   remotePlayers = [];
+   localPlayer = new Player("Mason");//prompt for name
+   
+   //start listening
+   setEventHandlers();
+   //request player initialization from server
+   socket.emit("initPlayer", {name:localPlayer.name});
+   
+   canvas = document.getElementById("myCanvas");
+   ctx = canvas.getContext("2d");
+   ctx.lineWidth = 2;
+   window.addEventListener("keydown", keyPressed, false);
+}
+
+function setEventHandlers() {
+   // socket.on("connect", onSocketConnected);
+   
+   //setting up game
+   socket.on("initPlayer", onInitPlayer);
+   socket.on("new player", onNewPlayer);//
+
+   //animating
+   socket.on("start game", onStartGame);//start moving
+   socket.on("move", onMoveEvent);//remote player moved
+   socket.on("crash", onPlayerCrash);//remote player collided
+}
+
+//initialize local player with state given by server
+function onInitPlayer(input){
+   localPlayer = new Player()
+   localPlayer.id = input.id;
+   localPlayer.color = input.color;
+   localPlayer.direction = input.direction;
+   localPlayer.position = input.position;
+   localPlayer.alive = true;
+   localPlayer.prevPos = input.position;
+   localPlayer.moveDrawn = true;
+   
+   console.log("local player initialized: ");
+   console.log(localPlayer);
+}
+
+//remote player joined
+function onNewPlayer(input){
+   console.log("onNewPlayer: ");
+   console.log(input);
+   
+   rPlayer = new Player(input.name);
+   rPlayer.id = input.id;
+   rPlayer.color = input.color;
+   rPlayer.position = input.position;
+   rPlayer.prevPos = input.position;
+   
+   remotePlayers.push(rPlayer);
+}
+
+/* ------------------------- ANIMATION -------------------------*/
+
+function animationDraw(){
+   //send local player move but don't draw yet
+   localPlayer.forward(2);
+   sendMove();
+   
+   //wait for move events
+   
+   console.log("Entering potentially endless wait");
+   while(!allMoved()){
+      //wait for move events to come in
+      //TODO:not sure if this will work due to single-threading of nodjs
+   }
+   console.log("Ready to animate move");
+   
+   // remote players always move first
+   remotePlayers.forEach(function(p){
+      //don't worry about checking collision of remote players.
+      //they will check/signal their own collision
+      if(p.alive){
+         drawLine(p.prevPos, p.position, p.color);
+         p.moveDrawn = true;
+      }
+   });
+   
+   //now local player moves
+   var crashed = checkCollision(localPlayer.position);
+   if(crashed){
+      localPlayer.alive = false;
+      signalCrash();
+   }
+   
+   raf = window.requestAnimationFrame(animationDraw);
+}
+
+//checks if all active players have moved since last animation
+function allMoved(){
+   if(localPlayer.moveDrawn)
+      return false;
+   for(var i=0; i<remotePlayers.length;i++){
+      if(remotePlayers[i].moveDrawn)//if no move since last draw
+         return false;
+   };
+   return true;
+}
+
+//draw line from iPos to fPos with given color
+function drawLine(iPos, fPos, color){
+   ctx.beginPath();
+   ctx.strokeStyle = color;
+   ctx.moveTo(iPos[0], iPos[1]);
+   ctx.lineTo(fPos[0], fPos[1]);
+   ctx.stroke();
+}
+
+//helper to check if grid position is okay to traverse
+function checkCollision(position){
+   var collision = false;
+   var x = position[0];
+   var y = position[1];
+   var xMax = canvas.width;
+   var yMax = canvas.height;
+   
+   if(x>xMax || y>yMax || x<0 || y<0){
+      collision = true;
+   } else {
+      var imgData = ctx.getImageData(x-1, y-1, 2, 2);
+      console.log(imgData.data);
+      for(var i = 0; i<imgData.data.length; i+=4){
+         var alpha = imgData.data[i+3];
+         collision |= (alpha == 255)
+      }
+   }
+   return collision;
+}
+
+//remote player moved
+function onMoveEvent(input){
+   console.log("onMoveEvent");
+   console.log(input);
+   //update state but no drawing here
+   findPlayer(input.id).moveTo(input.position);
+}
+
+//remote player collision
+function onPlayerCrash(input){
+   console.log("onPlayerCrash");
+   console.log(input);
+   findPlayer(input.id).alive = false;
+}
+
+//start animating
+function onStartGame(){
+   console.log("Starting game!");
+   raf = window.requestAnimationFrame(animationDraw);
+}
+
+//local player crash
+function signalCrash(){
+   console.log("I crashed!");
+   //TODO:maybe send position of crash too?
+   socket.emit("crash", {id: localPlayer.id});
+}
+
+function sendMove(){
+   console.log("Sending move");
+   socket.emit("move", {id: localPlayer.id, position: localPlayer.position});
+}
+
+//keyboard input for local player turning
+function keyPressed(e) {
+   switch(e.keyCode) {
+      case 37: // left key pressed
+         localPlayer.turn(0);
+         break;
+      case 38: // up key pressed
+         localPlayer.turn(1);
+         break;
+      case 39: // right key pressed
+         localPlayer.turn(2);
+         break;
+      case 40: // down key pressed
+         localPlayer.turn(3);
+         break;
+      default:
+         break;
+        // case 87: // w key pressed
+            // players[0].up();
+            // break;
+        // case 65: // a key pressed
+            // players[0].left();
+            // break;
+        // case 83: // s key pressed
+            // players[0].down();
+            // break;
+        // case 68: // d key pressed
+            // players[0].right();
+            // break;
+   }
+}
+
+// function stopAnimation(){
+   // window.cancelAnimationFrame(raf);
+// }
