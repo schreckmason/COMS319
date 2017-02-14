@@ -3,12 +3,11 @@ Game Client
 */
 
 //'Constructor'
-var Player = function(name){
+var Player = function(name, id){
    var position,
    direction,
-   alive,
    color,
-   id;
+   alive = true;
 
    //CHECK ME for pass by reference
    return {
@@ -16,6 +15,7 @@ var Player = function(name){
       direction : direction,
       alive : alive,
       color : color,
+      name: name, 
       id : id
    }
 };
