@@ -1,8 +1,11 @@
 var Calculator = {
     Model : {
-        operand: undefined,
-        operator: undefined,
-        append: true
+        operand: 0,
+        operator: '+',
+        memory: 0,
+        append: true,
+        opFirst: true
+        
     },
     View : {
         display : {id: "display", type: "text", value:"", onclick:""},
@@ -27,6 +30,8 @@ var Calculator = {
     }, 
     Controller : {
         binToDecimal : function(input){
+            if(input==='')
+                return 0;
             var positive = !input.startsWith('-');
             var charArray = input.slice(positive?0:1).split('');
             var result =0;
@@ -37,6 +42,8 @@ var Calculator = {
         },
         
         decToBinary : function(num){
+            if(num===0)
+                return 0;
             bin = [];
             var positive = num >= 0;
             num = Math.abs(num);
@@ -54,92 +61,128 @@ var Calculator = {
             } else if(!Calculator.Model.append){//Calculator.Model.operator instanceof String 
                 display.value = operand.value;
                 Calculator.Model.append = true;
+                Calculator.Model.opFirst = true;
             }
         },
         
         unary_operator_handler : function(operator){
+            // leave sign alone
             if(operator.value === '~'){
                 display.value = display.value.replace(/0/g, 'X').replace(/1/g, '0').replace(/X/g, '1');;
             } else if(operator.value === '>>'){
-                display.value = '0' + display.value.slice(0, -1);
+                var pos = !display.value.startsWith('-');
+                display.value = (pos?'':'-') + '0' + display.value.slice(pos?0:1, -1);
             } else {
                 //left shift (<<)
-                display.value = display.value.slice(1) + '0';
+                var pos = !display.value.startsWith('-');
+                display.value = (pos?'':'-') + display.value.slice(pos?1:2) + '0';
             }
         },
         
-        binary_operator_handler : function(operator){            
+        binary_operator_handler : function(operator){
+            console.log("binary operator: "+operator.value)
             Calculator.Model.operand = Calculator.Controller.binToDecimal(display.value);
             Calculator.Model.operator = operator.value;
+            Calculator.Model.append = false;
+            Calculator.Model.opFirst = true;
+        },
+        
+        memory_add_handler : function(){
+            Calculator.Model.memory += Calculator.Controller.binToDecimal(display.value);
+        },
+        
+        memory_sub_handler : function(){
+            Calculator.Model.memory -= Calculator.Controller.binToDecimal(display.value);
+        },
+        
+        memory_clear_handler : function(){
+            Calculator.Model.memory = 0;
+        },
+        
+        memory_recall_handler : function(){
+            display.value =  Calculator.Controller.decToBinary(Calculator.Model.memory);
             Calculator.Model.append = false;
         },
         
         equals_handler : function(){
-            var arg1dec = Calculator.Model.operand;
-            var arg2bin = display.value;
+            var arg = [{bin: undefined, dec: undefined},
+                       {bin: undefined, dec: undefined}];
+            var result = {bin: undefined, dec: undefined};
             var op = Calculator.Model.operator;
-            var binResult = undefined, decResult = undefined;
-            
-            if("=-*/%".includes(op)){
+            console.log(arg);
+            if(Calculator.Model.opFirst){
+                arg[0].dec = Calculator.Model.operand;
+                arg[1].bin = display.value;
+            } else {
+                arg[0].bin = display.value;
+                arg[1].dec = Calculator.Model.operand;
+            }
+            console.log(arg);
+            console.log(op);
+            if("+-*/%".includes(op)){
                 //decimal operations
-                var arg2dec = Calculator.Controller.binToDecimal(display.value);
+                arg.forEach(function(op){
+                    if(op.dec === undefined)
+                        op.dec = Calculator.Controller.binToDecimal(op.bin);
+                });
                 
                 if(op === '+'){
-                    decResult = arg1dec+arg2dec;
+                    result.dec = arg[0].dec+arg[1].dec;
                 } else if(op === '-'){
-                    decResult = arg1dec-arg2dec;
+                    result.dec = arg[0].dec-arg[1].dec;
                 } else if(op === '*'){
-                    decResult = arg1dec*arg2dec; 
+                    result.dec = arg[0].dec*arg[1].dec; 
                 } else if(op === '/'){
-                    decResult = Math.floor(arg1dec/arg2dec); 
+                    var temp = arg[0].dec/arg[1].dec;
+                    result.dec = temp>0? Math.floor(temp): Math.ceil(temp); 
                 } else if(op === '%'){
-                    decResult = arg1dec%arg2dec; 
+                    result.dec = arg[0].dec%arg[1].dec; 
                 }
-                binResult = Calculator.Controller.decToBinary(decResult);
+                result.bin = Calculator.Controller.decToBinary(result.dec);
             } else {
-                //binary operations
-                //result has number of digits same as longer operand
-                var arg1bin = Calculator.Controller.decToBinary(arg1dec);
-                var operand = [arg1bin, arg2bin];
-                binResult = [];
+                //binary operations (result has number of digits same as longer operand)
                 
                 var maxLength = 0;
-                operand.forEach(function(bitString, index, arr){
-                        var positive = !bitString.startsWith('-');
-                        arr[index] = 
-                            {positive: positive,
-                            bits: bitString.slice(positive?0:1).split('')};
-                        maxLength = Math.max(maxLength, arr[index].bits.length);
-                    });
+                // Define all binary strings; remove any sign; replace binary strings with map of bits and sign; update max length of bits
+                arg.forEach(function(op){
+                    var bitString = op.bin === undefined? Calculator.Controller.decToBinary(op.dec): op.bin;
+                    op.dec = op.dec === undefined? Calculator.Controller.binToDecimal(op.bin): op.dec;
+                    var positive = !bitString.startsWith('-');
+                    op.bin = 
+                        {positive: positive,
+                         bits: bitString.slice(positive?0:1).split('')};
+                    maxLength = Math.max(maxLength, op.bin.bits.length);});
                     
-                console.log(operand);
-                operand.forEach(function(op){
-                    console.log(maxLength);
-                    console.log(op);
-                    op.bits = new Array(maxLength - op.bits.length).fill(0).concat(op.bits);});
-                
+                // Pad all bit strings to the same length with leading zeros
+                arg.forEach(function(op){
+                    op.bin.bits = new Array(maxLength - op.bin.bits.length).fill('0').concat(op.bin.bits);});
+                    
+                result.bin = [];
                 for(i=0; i < maxLength; i++){
                     var newBit;
                     if(op === '&'){
-                        newBit = operand[0].bits[i] & operand[1].bits[i];
+                        newBit = arg[0].bin.bits[i] & arg[1].bin.bits[i];
                     } else if(op === '|'){
-                        newBit = operand[0].bits[i] | operand[1].bits[i];
+                        newBit = arg[0].bin.bits[i] | arg[1].bin.bits[i];
                     }
-                    binResult.push(newBit);
+                    result.bin.push(newBit);
                 }
-                var positive = op==='&'?!operand[0].positive && !operand[1].positive: !operand[0].positive || !operand[1].positive;
-                binResult = (positive?'':'-') + binResult.join('')
-                decResult = Calculator.Controller.binToDecimal(binResult);
+                var posRes = arg[0].bin.positive || arg[1].bin.positive;//TODO
+                result.bin = (posRes?'':'-') + result.bin.join('')
+                result.dec = Calculator.Controller.binToDecimal(result.bin);
             }
             
-            display.value = binResult; 
-            Calculator.Model.operand = decResult;
+            console.log(result);
+            display.value = result.bin; 
+            Calculator.Model.operand = arg[1].dec;
+            Calculator.Model.opFirst = false;
             Calculator.Model.append = false;
         },
         clear_handler : function(){
-            Calculator.Model.operator = undefined;
-            Calculator.Model.operand = undefined;
+            Calculator.Model.operator = '+';
+            Calculator.Model.operand = 0;
             Calculator.Model.append = true;
+            Calculator.Model.opFirst = false;
             display.value = "";
         }
     },
@@ -201,6 +244,11 @@ var Calculator = {
         Calculator.View.buttonEq.onclick="Calculator.Controller.equals_handler(this)";
         
         Calculator.View.clear.onclick="Calculator.Controller.clear_handler(this)";
+        
+        Calculator.View.memRecall.onclick="Calculator.Controller.memory_recall_handler(this)";
+        Calculator.View.memClear.onclick="Calculator.Controller.memory_clear_handler(this)"
+        Calculator.View.memAdd.onclick="Calculator.Controller.memory_add_handler(this)"
+        Calculator.View.memSub.onclick="Calculator.Controller.memory_sub_handler(this)"
         
         var unary = ["inverse", "right", "left"];
         for(var i=0;i<unary.length;i++){
