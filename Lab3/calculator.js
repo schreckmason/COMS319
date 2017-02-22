@@ -3,14 +3,14 @@
 //top-level object
 var Calculator = {
     Model : {
-        argument_1: undefined,//this is the first operand, also holds result in memeory during calculations
-        operator : undefined,
-        argument_2: undefined
-      
+        argument : 0,
+        memory : 0,
+        operator : '+',
+        argFirst : true,
+        append : true
     },
     
     View : {
-        //label : {id: "label", type: "label", value: "Enter Expression", onclick: ""},
         buttonMult : {id: "buttonMult", type: "button", value: "*", onclick: ""},
         buttonAdd : {id: "buttonAdd", type: "button", value: "+", onclick: ""},
         buttonSub : {id: "buttonSub", type: "button", value: "-", onclick: ""},
@@ -18,7 +18,7 @@ var Calculator = {
         buttonDec : {id: "buttonDec", type: "button", value: ".", onclick: ""},
         buttonEq : {id: "buttonEq", type: "button", value: "=", onclick: ""},
         
-        resultRow : {id: "resultRow", type: "text", value:"", onclick:""},
+        display : {id: "display", type: "text", value:"", onclick:""},
         button9 : {id: "button9", type: "button", value: 9, onclick: ""},
         button8 : {id: "button8", type: "button", value: 8, onclick: ""},
         button7 : {id: "button7", type: "button", value: 7, onclick: ""},
@@ -39,34 +39,139 @@ var Calculator = {
     },
     
     Controller : {
-            //check model for old value to repeat on multiple clicks of '='
-            //update DOM
-        operand1_Handler : function(that){
-            if(Calculator.Model.argument_1===undefined){
-                Calculator.Model.argument_1 = that.value;
-                console.log("operand1 "+ Calculator.Model.argument_1);
-                resultRow.value+=Calculator.Model.argument_1;
+        operand_handler : function(operand){
+            //0123456789.
+            if(!Calculator.Model.append){
+                display.value = "";
+                Calculator.Model.append = true;
+                Calculator.Model.argFirst = true;
             }
-            else{
-                Calculator.Model.argument_2 = that.value;
-                console.log("operand2 "+Calculator.Model.argument_2);
-                resultRow.value+=Calculator.Model.argument_2;
+            
+            if(operand.value == "."){
+                console.log("tried to add decimal; diplay = " + display.value);
+                if(!display.value.includes('.')){
+                    display.value += (display.value===""? "0":"") + "."
+                }
+            } else {
+                display.value += operand.value;
             }
+            
         },
-
-        operatorHandler : function(that){
-            if(Calculator.Model.operator===undefined){
-                Calculator.Model.operator = that.value;
-                console.log("Operator "+Calculator.Model.operator);
-                resultRow.value+=that.value;
+        
+        operator_handler : function(operator){
+            console.log("operator: "+operator.value)
+            Calculator.Model.argument = parseFloat(display.value);
+            Calculator.Model.operator = operator.value;
+            Calculator.Model.append = false;
+            Calculator.Model.argFirst = true;
+        },
+        
+        memory_add_handler : function(){
+            Calculator.Model.memory += parseFloat(display.value);
+        },
+        
+        memory_sub_handler : function(){
+            Calculator.Model.memory -= parseFloat(display.value);
+        },
+        
+        memory_clear_handler : function(){
+            Calculator.Model.memory = 0;
+        },
+        
+        memory_recall_handler : function(){
+            display.value =  "" + Calculator.Model.memory;
+            Calculator.Model.append = false;
+        },
+        
+        clear_handler : function(){
+            Calculator.Model.operator = '+';
+            Calculator.Model.argument = 0;
+            Calculator.Model.append = true;
+            Calculator.Model.argFirst = false;
+            display.value = "";
+        },
+        
+        
+        equals_handler : function(){
+            var arg = [Calculator.Model.argument,
+                       parseFloat(display.value)];
+            if(!Calculator.Model.argFirst)
+                arg = arg.reverse();
+            var op = Calculator.Model.operator;
+            
+            console.log(arg);
+            console.log(op);
+            
+            var result = 0;
+            if(op === '+'){
+                result = arg[0] + arg[1];
+            } else if(op === '-'){
+                result = arg[0] - arg[1];
+            } else if(op === '*'){
+                result = arg[0] * arg[1];
+            } else {//(op === '/'){
+                result = arg[0] / arg[1];
             }
+            console.log(result);
+            
+            display.value = "" + result; 
+            Calculator.Model.argument = arg[1];
+            Calculator.Model.argFirst = false;
+            Calculator.Model.append = false;
         }
-
+        
+        // getResult : function(operand1, operator, operand2){
+            // Calculator.clearResultBox();
+            // var result;
+            // switch(operator){
+                // case "+":
+                    // result = parseFloat(operand1)+parseFloat(operand2);
+                    // display.value=result;
+                    // break;
+                // case "-":
+                    // result = parseFloat(operand1)-parseFloat(operand2);
+                    // display.value=result;
+                    // break;
+                // case "*":
+                    // result = parseFloat(operand1)*parseFloat(operand2);
+                    // display.value=result;
+                    // break;
+                // case "/":
+                    // result = parseFloat(operand1)/parseFloat(operand2);
+                    // display.value=result;
+                    // break;
+                // default:
+                    // alert("Invalid operation");
+            // }
+            // Calculator.Model.argument_1 = result;
+            // console.log("arg1 : "+Calculator.Model.argument_1);
+            // Calculator.Model.operator=undefined;
+        // },
+        
+        // memoryRecall : function(){
+            // if(Calculator.Model.argument_1!==undefined){
+                // display.value=Calculator.Model.argument_1;
+            // }
+            // else{
+                // alert("nothing in memory, perhaps you used MC");
+            // }
+        // },
+        
+        // memoryAdd : function(){
+            // var result = parseFloat(Calculator.Model.argument_2) + parseFloat(Calculator.Model.argument_1);//here, the argument_1 is what is held in memory
+            // console.log("M+ "+result);
+            // display.value=result;
+        // },
+        
+        // memorySub : function(){
+            // var result = parseFloat(Calculator.Model.argument_1)-parseFloat(Calculator.Model.argument_2);
+            // console.log("M- "+result);
+            // display.value=result;
+        // }
     },
     
     run : function(){
         Calculator.attachHandlers();
-        Calculator.attachOperator();
         
         console.log(Calculator.display());
         return Calculator.display();
@@ -85,7 +190,7 @@ var Calculator = {
     display : function() {
         var s;
         s = "<table id=\"myTable\" border=2>";
-        s += "<tr><td>" + Calculator.displayElement(Calculator.View.resultRow) + "</td></tr>";
+        s += "<tr><td>" + Calculator.displayElement(Calculator.View.display) + "</td></tr>";
         s += "<tr><td>";
         s += Calculator.displayElement(Calculator.View.button7);
         s += Calculator.displayElement(Calculator.View.button8);
@@ -129,87 +234,21 @@ var Calculator = {
 
     attachHandlers : function() {
         for(var i=0;i<10;i++){
-            Calculator.View["button"+i].onclick="Calculator.Controller.operand1_Handler(this)";
+            Calculator.View["button"+i].onclick="Calculator.Controller.operand_handler(this)";
         }
-        Calculator.Model.argument_1 = undefined;
-        Calculator.View.buttonClear.onclick="Calculator.clearResultBox()";
+        Calculator.View.buttonDec.onclick="Calculator.Controller.operand_handler(this)";
         
-        //This only works with a soft clear (C) not with MC
-        Calculator.View.memRecall.onclick="Calculator.memoryRecall()";//must take place after result, so argument 1 currently holds result after first calculation
-        Calculator.View.memoryClear.onclick="Calculator.clear()";//resets everything including result, MR will not work
-        Calculator.View.memAdd.onclick="Calculator.memoryAdd()";
-        Calculator.View.memSub.onclick="Calculator.memorySub()";
+        Calculator.View.memRecall.onclick="Calculator.Controller.memory_recall_handler(this)"
+        Calculator.View.memoryClear.onclick="Calculator.Controller.memory_clear_handler(this)";
+        Calculator.View.memAdd.onclick="Calculator.Controller.memory_add_handler(this)";
+        Calculator.View.memSub.onclick="Calculator.Controller.memory_sub_handler(this)";
         
-
-    },
-    attachOperator : function(){
-        Calculator.View.buttonAdd.onclick="Calculator.Controller.operatorHandler(this)";
-        Calculator.View.buttonSub.onclick="Calculator.Controller.operatorHandler(this)";
-        Calculator.View.buttonMult.onclick="Calculator.Controller.operatorHandler(this)";
-        Calculator.View.buttonDiv.onclick="Calculator.Controller.operatorHandler(this)";
-        Calculator.View.buttonDec.onclick="Calculator.Controller.operatorHandler(this)";
-        Calculator.View.buttonEq.onclick="Calculator.getResult(Calculator.Model.argument_1,Calculator.Model.operator,Calculator.Model.argument_2)";
-    },
-    
-    clear : function(){
-        Calculator.Model.argument_1 = undefined;
-        Calculator.Model.argument_2 = undefined;
-        Calculator.Model.operator = undefined;
-        Calculator.clearResultBox();
-    },
-    
-    clearResultBox : function(){
-      resultRow.value="";  
-    },
-    
-    getResult : function(operand1, operator, operand2){
-        Calculator.clearResultBox();
-        var result;
-        switch(operator){
-            case "+":
-                result = parseFloat(operand1)+parseFloat(operand2);
-                resultRow.value=result;
-                break;
-            case "-":
-                result = parseFloat(operand1)-parseFloat(operand2);
-                resultRow.value=result;
-                break;
-            case "*":
-                result = parseFloat(operand1)*parseFloat(operand2);
-                resultRow.value=result;
-                break;
-            case "/":
-                result = parseFloat(operand1)/parseFloat(operand2);
-                resultRow.value=result;
-                break;
-            default:
-                alert("Invalid operation");
-        }
-        Calculator.Model.argument_1 = result;
-        console.log("arg1 : "+Calculator.Model.argument_1);
-        Calculator.Model.operator=undefined;
-    },
-    
-    memoryRecall : function(){
-        if(Calculator.Model.argument_1!==undefined){
-            resultRow.value=Calculator.Model.argument_1;
-        }
-        else{
-            alert("nothing in memory, perhaps you used MC");
-        }
-    },
-    
-    memoryAdd : function(){
-        var result = parseFloat(Calculator.Model.argument_2) + parseFloat(Calculator.Model.argument_1);//here, the argument_1 is what is held in memory
-        console.log("M+ "+result);
-        resultRow.value=result;
-    },
-    
-    memorySub : function(){
-        var result = parseFloat(Calculator.Model.argument_1)-parseFloat(Calculator.Model.argument_2);
-        console.log("M- "+result);
-        resultRow.value=result;
-    }
-
-    
-}//end of Calculator
+        Calculator.View.buttonAdd.onclick="Calculator.Controller.operator_handler(this)";
+        Calculator.View.buttonSub.onclick="Calculator.Controller.operator_handler(this)";
+        Calculator.View.buttonMult.onclick="Calculator.Controller.operator_handler(this)";
+        Calculator.View.buttonDiv.onclick="Calculator.Controller.operator_handler(this)";
+        
+        Calculator.View.buttonEq.onclick="Calculator.Controller.equals_handler(this)";
+        Calculator.View.buttonClear.onclick="Calculator.Controller.clear_handler(this)";
+    }    
+}
