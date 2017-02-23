@@ -1,0 +1,6 @@
+Mason
+    - Created the framework for both calculators including the code which generates the html to be displayed.
+    - Implemented a majority of the Decimal Calculator Control logic
+Drake
+    - Wrote Control logic for the Binary Calculator
+    - Made significant improvements to the decimal calculator based on state logic developed for binary
