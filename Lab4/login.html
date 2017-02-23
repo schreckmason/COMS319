@@ -1,0 +1,47 @@
+<html>
+   <head>
+      <meta charset="utf-8"/>
+      <script type="text/javascript" src="login.js"></script>
+   </head>
+   <style>
+      form {
+          border: 3px solid #f1f1f1;
+      }
+
+      input[type=text] {
+          width: 100%;
+          padding: 12px 20px;
+          margin: 8px 0;
+          display: inline-block;
+          border: 1px solid #ccc;
+          box-sizing: border-box;
+      }
+
+      input[type=button]  {
+          background-color: #4CAF50;
+          color: white;
+          padding: 14px 20px;
+          margin: 8px 0;
+          border: none;
+          cursor: pointer;
+          width: 100%;
+      }
+   </style>
+   <body>
+      <form id="personalInfo" action="">
+         <p id="User Name">
+            <label for="UsernameBox">User Name:</label>
+            <br/>
+            <input id="UsernameBox" name="userName" type="text"/>
+         </p>
+
+         <p id="Password">
+            <label for="passwordBox">Password</label>
+            <br/>
+            <input id="passwordBox" name="password" type="text"/>
+         </p>
+
+         <input onClick="login()" type="button" id="login" value="Login"/>
+      </form>
+   </body>
+</html>
