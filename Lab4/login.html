@@ -1,6 +1,8 @@
 <html>
    <head>
       <meta charset="utf-8"/>
+      <!--Use jQuery-->
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
       <script type="text/javascript" src="login.js"></script>
    </head>
    <style>
@@ -31,9 +33,9 @@
    <body>
       <form id="personalInfo" action="">
          <p id="User Name">
-            <label for="UsernameBox">User Name:</label>
+            <label for="usernameBox">User Name:</label>
             <br/>
-            <input id="UsernameBox" name="userName" type="text"/>
+            <input id="usernameBox" name="userName" type="text"/>
          </p>
 
          <p id="Password">
@@ -42,7 +44,7 @@
             <input id="passwordBox" name="password" type="text"/>
          </p>
 
-         <input onClick="login()" type="button" id="login" value="Login"/>
+         <input type="button" id="login" value="Login"/>
       </form>
    </body>
 </html>
