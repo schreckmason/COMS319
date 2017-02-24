@@ -7,12 +7,14 @@
 class Library{
    //Map of shelf objects to allow books to be pushed to a structure
    constructor(){
-      this.shelves = {
-         "art" : new Shelf(),
-         "science" : new Shelf(),
-         "sport" : new Shelf(),
-         "lit" : new Shelf()
-      };
+      this.shelves = [new Shelf(), new Shelf(), new Shelf(), new Shelf()];
+      this.shelfNames = ["Art", "Science", "Sport", "Literature"];
+      // {
+         // "art" : new Shelf(),
+         // "science" : new Shelf(),
+         // "sport" : new Shelf(),
+         // "lit" : new Shelf()
+      // };
       for(var i=0; i<25; i++){
          let b = new Book("B"+i);
          this.addBook(b);
@@ -20,24 +22,25 @@ class Library{
    }
 
    addBook(book){
-      //Switch statement instead
-      switch(book.id%4){
-         case 0:
-            this.shelves.art.add(book);
-            break;
-         case 1:
-            this.shelves.science.add(book);
-            break;
-         case 2:
-            this.shelves.sport.add(book);
-            break;
-         case 3:
-            this.shelves.lit.add(book);
-            break;
-         default:
-            alert("no valid book id found for "+book.name);
-            break;
-      }
+      this.shelves[book.id%4].add(book);
+      // //Switch statement instead
+      // switch(book.id%4){
+         // case 0:
+            // this.shelves.art.add(book);
+            // break;
+         // case 1:
+            // this.shelves.science.add(book);
+            // break;
+         // case 2:
+            // this.shelves.sport.add(book);
+            // break;
+         // case 3:
+            // this.shelves.lit.add(book);
+            // break;
+         // default:
+            // alert("no valid book id found for "+book.name);
+            // break;
+      // }
    }
 }
 
@@ -60,6 +63,7 @@ class Book{
 
 //Create an instance of a library to use
 let l = new Library();
+   console.log(l);
 
 //make sure page is loaded (need user and isAdmin)
 $(document).ready( function () {
@@ -77,44 +81,38 @@ $(document).ready( function () {
 
 //create initial table
 function generateTable(){
-   var columns=4;
-   var rows;
+   var maxBooks = 0;
+   l.shelves.forEach(function(item){maxBooks = Math.max(item.books.length, maxBooks);});
+   var shelves = 4;
    
-   //Me being lazy and not wanting to re-type all of this in conditionals
-   var art = l.shelves.art.books.length;
-   var science = l.shelves.science.books.length;
-   var sport = l.shelves.sport.books.length;
-   var literature = l.shelves.lit.books.length;
-   
-   //A way to assign the number of rows in our given table to a maximum of the largest shelf in the library
-   if(art>=science && art>=sport && art>=literature){ rows = art;}
-   else if(science>=art && science>=sport && science>=literature){rows = science; }
-   else if(sport>=art && sport>=science && sport>=literature){rows = sport; }
-   else{ rows = literature; }
    
    //Debugging for sanity checks and TA's can uncomment for ease of debugging
-   //console.log(l.shelves.art.books);
-   //console.log(l.shelves.science.books);
-   //console.log(l.shelves.sport.books);
-   //console.log(l.shelves.lit.books);
+   //console.log(l.shelves[0].books);
+   //console.log(l.shelves[1].books);
+   //console.log(l.shelves[2].books);
+   //console.log(l.shelves[3].books);
 
    //Table generation taken from test1.js but implemented with our class structure
    bookTable = $("<table border='2'></table>"); // creates DOM elements
    tableBody = $('<tbody></tbody>');
-   for(var i=0;i<rows;i++){
+   
+   for(var i=0;i<shelves;i++){
       curr_row=$('<tr></tr>');
-      for(var j=0;j<columns;j++){
-         curr_cell=$('<td></td>');
-         //I apologize for in-line writing, but I am cranking through this, I will fix this during the day tomorrow
-         if(j===0 && i<art){ curr_text=l.shelves.art.books[i].name; curr_cell.append(curr_text); curr_row.append(curr_cell);}
-         else if(j===1 && i<science) { curr_text=l.shelves.science.books[i].name; curr_cell.append(curr_text); curr_row.append(curr_cell);}
-         else if(j===2 && i<sport) { curr_text=l.shelves.sport.books[i].name; curr_cell.append(curr_text); curr_row.append(curr_cell);}
-         else if(j===3 && i<literature){ curr_text=l.shelves.lit.books[i].name; curr_cell.append(curr_text); curr_row.append(curr_cell);}
-         //This is improper, but I wrote it this way to make sure my idea worked, need a 'default' else case here
+      row_header = $('<th></th>');
+      row_header.append(l.shelfNames[i]);//set row name
+      curr_row.append(row_header);
       
+      for(var j=0;j<maxBooks;j++){
+         curr_cell=$('<td></td>');
+         if(j<l.shelves[i].books.length){
+            curr_cell.append(l.shelves[i].books[j].name);
+         }
+         console.log(curr_cell);
+         curr_row.append(curr_cell);
       }
       tableBody.append(curr_row);
    }
+   
    bookTable.append(tableBody);
    //#congrats is currently just a place holder (anchor) for insertBefore need a better convention
    bookTable.insertBefore($('#congrats')); 
@@ -134,8 +132,7 @@ function generateLibrarianFields(){
          //handle adding a book to the table here
          //take two variables from text fields and construct a book object with them, and propagate them to Library
          //then call generateTable() again
-         var title = $('#titleBox').val();
-         var genre = $('#genreBox').val().toLowerCase();//to assure a common-form
+         var title = $('#titleBox').val();  var genre = $('#genreBox').val().toLowerCase();//to assure a common-form
          console.log(title);
          console.log(genre);
          let addition = new Book(title);
