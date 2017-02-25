@@ -1,0 +1,2 @@
+code.html explained in html comments - (many different effects/css changes for various actions/events)
+bookslibrary works as expected. open login.html, login and do library things. to log in with a different user, press back or open a new login.html tab.

@@ -1,43 +1,62 @@
 <html>
+   <head>
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+      <script src="code.js"></script>
+   </head>
 
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-<script src="code.js"></script>
-<head>
-</head>
-<div/>
-<body>
-<input id="hideShow" type="button" value="hide/show"/>
-<p id="first">
-Call it good
-</p>
-<table id="dinnerTable" border='2'>
-<tr>
-	<td>Plate</td>
-	<td>French Toast</td>
-	<td>Silverware</td>
-</tr>
-<tr>
-	<td>Scrambled Eggs</td>
-	<td>Napkin</td>
-	<td>Syrup</td>
-</tr>
-<tr>
-	<td>Sardines</td>
-	<td>Something funny but not inappropriate</td>
-	<td>Paincakes</td>
-</tr>
-</table>
-<p id="second">
-Ok, Drake
-</p>
-
-<p id="third">
-I know.
-</p>
-
-<p id="fourth">
-SURPRISE!
-</p>
-
-</body>
+   <body>
+      <input id="hideShow" type="button" value="hide/show"/>
+      <!-- Html-Element: paragraph; effect: 
+      all paragraphs will slide up when this is clicked
+      -->
+      <p id="first">
+         This is the first paragraph.
+      </p>
+      <!-- Html-Element: table; effect: 
+      this will toggle when the button is pressed
+      p4 shows up and all paragraphs fade to 50% alpha when this is clicked
+      all paragraphs fade i when this is double clicked
+      background color of all cells and border change color when the table is right-clicked
+      -->
+      <table id="dinnerTable" border='2'>
+         <tr>
+            <td>Plate</td>
+            <td>French Toast</td>
+            <td>Silverware</td>
+         </tr>
+         <tr>
+            <td>Scrambled Eggs</td>
+            <td>Napkin</td>
+            <td>Syrup</td>
+         </tr>
+         <tr>
+            <td>Sardines</td>
+            <td>Candy</td>
+            <td>Pancakes</td>
+         </tr>
+      </table>
+      <!-- Html-Element: paragraph; effect: 
+      all paragraphs turn red when this is clicked
+      the text here changes when a mousmove occurs over any paragraph
+      -->
+      <p>
+         Some more text in another paragraph
+      </p>
+      <p>
+         Third paragraph.
+      </p>
+      <!-- Html-Element: input; effect: 
+      font-family/ color of table cells change when keys are pressed here
+      -->
+      <input type='text' placeholder='first text box' />
+      <input type='text' placeholder='box 2' />
+      <!-- Html-Element: paragraph; effect: 
+      this is hidden initially
+      this shows up when the table is clicked
+      font size changes when moused over
+      -->
+      <p>
+         SURPRISE! 4th paragraph.
+      </p>
+   </body>
 </html>
