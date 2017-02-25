@@ -1,99 +1,179 @@
-//Sanity check
-//var user=localStorage.getItem('user');
-//var librarian=localStorage.getItem('isAdmin');
-//console.log(user);
-//console.log(librarian);
+/* --------------------------------------------- Handler functions --------------------------------------------------------*/
+var handleBookClick = function(){
+   var book = l.findBook(this.id);
+   if(book){
+      if(!getUser()=='admin'){
+         if(book.availability){
+            // not checked out
+            console.log("not checked out");
+            if(numCheckedOutBooks() < 2){
+               book.borrowedBy = getUser();
+               book.availability = 0;
+               this.bgColor = '#FF4444';//change cell to red
+            } else {
+               console.log("I already have " + numCheckedOutBooks() + " books checked out!");
+            }
+         } else {
+            if(book.borrowedBy == getUser()){
+               //checked out by me
+               book.availability = 1;
+               book.borrowedBy = undefined;
+               this.bgColor = '#FFFFFF';//change cell to white
+               console.log("Returned it.");
+            } else {
+               console.log("checked out by someone else...");
+               //checked out by someone else
+            }
+         }
+         updateLocalStorage();
+      }
+      $('#bookDescription').text(getBookDescription(book));
+   } else {
+      console.log("couldn't find book");
+   }
+}
+
+var getBookDescription = function(book){
+   var desc = book.title + " is a " + l.shelfNames[book.id%4] + " book ";
+   desc += "which is currently " + (book.availability? "on the shelf.": "checked out by " + book.borrowedBy + ".");
+   return desc;
+}
+
+var numCheckedOutBooks = function(){
+   var count = 0;
+   var user = getUser();
+   l.shelves.forEach(function(shelf){
+         shelf.books.forEach(function(book){
+            if(book.borrowedBy == user)
+               count++;
+         });
+      });
+   return count;
+}
+
+var getUser = function(){
+   return localStorage.getItem('user');
+}
+
+var updateLocalStorage = function(){
+   var libData = JSON.stringify(l)
+   localStorage.setItem("lib", libData);
+}
+
+/* --------------------------------------------- CLASS DEFINITIONS --------------------------------------------------------*/
 
 class Library{
-   //Map of shelf objects to allow books to be pushed to a structure
+   
    constructor(){
-      this.shelves = [new Shelf(), new Shelf(), new Shelf(), new Shelf()];
       this.shelfNames = ["Art", "Science", "Sport", "Literature"];
-      // {
-         // "art" : new Shelf(),
-         // "science" : new Shelf(),
-         // "sport" : new Shelf(),
-         // "lit" : new Shelf()
-      // };
-      for(var i=0; i<25; i++){
-         let b = new Book("B"+i);
-         this.addBook(b);
+      if(arguments.length>0){
+         this.populateFromJson(arguments[0]);
+      } else {
+         this.shelves = [new Shelf(), new Shelf(), new Shelf(), new Shelf()];
+         for(var i=0; i<25; i++){
+            let b = new Book("B"+i);
+            this.addBook(b);
+         }
       }
+   }
+   populateFromJson(jsonLib){
+      var libData = JSON.parse(jsonLib);
+      this.shelves = libData.shelves;
+      console.log(libData);
    }
 
    addBook(book){
-      this.shelves[book.id%4].add(book);
-      // //Switch statement instead
-      // switch(book.id%4){
-         // case 0:
-            // this.shelves.art.add(book);
-            // break;
-         // case 1:
-            // this.shelves.science.add(book);
-            // break;
-         // case 2:
-            // this.shelves.sport.add(book);
-            // break;
-         // case 3:
-            // this.shelves.lit.add(book);
-            // break;
-         // default:
-            // alert("no valid book id found for "+book.name);
-            // break;
-      // }
+      console.log(book);
+      console.log(this.shelves);
+      this.shelves[book.id%4].books.push(book);
+   }
+   
+   findBook(bookID){
+      var foundBook = false;
+      this.shelves.forEach(function(shelf){
+         shelf.books.forEach(function(book){
+            if(book.id == bookID){
+               foundBook = book;
+            }
+         });
+      });
+      return foundBook;
+   }
+   
+   getShelfNum(shelfName){
+      shelfName = shelfName.charAt(0).toUpperCase() + shelfName.slice(1).toLowerCase();
+      return this.shelfNames.findIndex(function(name){name==shelfName});
    }
 }
 
 class Shelf{
    constructor(){
-   this.books=[];
-   }
-
-   add(book){
-      this.books.push(book);
+      if(arguments.length > 0){
+         this.books = arguments[0];
+      } else {
+         this.books = [];
+      }
    }
 }
 
 class Book{
-   constructor(b){
-      this.name = b;
+   constructor(title){
+      console.log(arguments);
+      this.title = title;
+      this.availability = 1;
+      this.borrowedBy = undefined;
       this.id = Math.floor(Math.random() * 1000);
+      if(arguments.length == 2){
+         var shelfNum = arguments[1];
+         this.id = this.id - this.id%4 + shelfNum;
       }
+   }
 }
 
-//Create an instance of a library to use
-let l = new Library();
-   console.log(l);
+/* --------------------------------------------- Create Library --------------------------------------------------------*/
 
-//make sure page is loaded (need user and isAdmin)
+
+var initLibrary = function(){
+   // localStorage.removeItem('lib');//reset library
+   var libData = localStorage.getItem('lib');
+   if(libData){
+      l = new Library(libData);
+   } else {
+      l = new Library();
+   }
+}
+
+/* --------------------------------------------- Document Ready --------------------------------------------------------*/
+
 $(document).ready( function () {
-   //No matter the credentials the table needs to be generated first, then changed and redrawn
-   generateTable();
+   //No matter the credentials the table needs to be generated first
+   let l;
+   initLibrary();
    
-   if(localStorage.getItem('user')==='admin'){
+   tablePlaceHolder = $("<div id='table'/>");
+   descDiv = $("<div id='bookDescription' />");
+   $('body').append(tablePlaceHolder);
+   $('body').append($('<br/>'));
+   $('body').append(descDiv);
+   $('body').append($('<br/>'));
+   
+   updateTable();
+   
+   if(getUser()==='admin'){
       //generate librarian view
       generateLibrarianFields();
    }
-   else{
-      //generate student view
-   }
 });
 
-//create initial table
-function generateTable(){
+/* --------------------------------------------- GUI Functions --------------------------------------------------------*/
+
+var updateTable = function(){
    var maxBooks = 0;
    l.shelves.forEach(function(item){maxBooks = Math.max(item.books.length, maxBooks);});
    var shelves = 4;
    
-   
-   //Debugging for sanity checks and TA's can uncomment for ease of debugging
-   //console.log(l.shelves[0].books);
-   //console.log(l.shelves[1].books);
-   //console.log(l.shelves[2].books);
-   //console.log(l.shelves[3].books);
-
    //Table generation taken from test1.js but implemented with our class structure
-   bookTable = $("<table border='2'></table>"); // creates DOM elements
+   bookTable = $("<table id='table' border='2'></table>"); // creates DOM elements
    tableBody = $('<tbody></tbody>');
    
    for(var i=0;i<shelves;i++){
@@ -105,41 +185,42 @@ function generateTable(){
       for(var j=0;j<maxBooks;j++){
          curr_cell=$('<td></td>');
          if(j<l.shelves[i].books.length){
-            curr_cell.append(l.shelves[i].books[j].name);
+            //set onclick handler
+            curr_cell.click(handleBookClick);
+            var book = l.shelves[i].books[j];
+            curr_cell.append(book.title);
+            curr_cell.attr('id', book.id);
+            curr_cell.attr('bgColor', 
+               book.availability? '#FFFFFF':
+               (book.borrowedBy==getUser()? '#FF4444':
+               '#FFAAAA'));
          }
-         console.log(curr_cell);
          curr_row.append(curr_cell);
       }
       tableBody.append(curr_row);
    }
-   
    bookTable.append(tableBody);
-   //#congrats is currently just a place holder (anchor) for insertBefore need a better convention
-   bookTable.insertBefore($('#congrats')); 
+   
+   destination = $('#table');
+   destination.replaceWith(bookTable); 
 }
+
 //generates the text boxes and button that are only displayed upon admin authentication, potentially need an anchor to insertBefore with
-function generateLibrarianFields(){
-      addTitle = $("<input id='titleBox' name='titleBox' type='text'/>");
-      addGenre = $("<input id='genreBox' name='genreBox' type='text'/>");
+var generateLibrarianFields = function(){
+      addTitle = $("<input id='titleBox' name='titleBox' placeholder='Book Name' type='text'/>");
+      addGenre = $("<input id='genreBox' name='genreBox' placeholder='Shelf' type='text'/>");
       addButton = $("<input id='submitButton' name='submitButton' type='button' value='Add Book'/>");
-      //change to insertion after table, #congrats is currently just a placeholder
-      addTitle.insertBefore($('#congrats'));
-      addGenre.insertBefore($('#congrats'));
-      addButton.insertBefore($('#congrats'));
-      
-      $('#submitButton').click(function(){
-         //alert('clicked me');
-         //handle adding a book to the table here
-         //take two variables from text fields and construct a book object with them, and propagate them to Library
-         //then call generateTable() again
-         var title = $('#titleBox').val();  var genre = $('#genreBox').val().toLowerCase();//to assure a common-form
-         console.log(title);
-         console.log(genre);
-         let addition = new Book(title);
-         
-         //need to force ID%4 here to put into correct categories (w/out changing object structure)
-         l.addBook(addition);//my attempts to force a book into a given genre were sloppy, i provided the necessities though
-         generateTable();//need a different method than this to update table neatly this is for testing
+
+      addButton.click(function(){
+         var title = $('#titleBox').val(); 
+         var genre = $('#genreBox').val();
+         l.addBook(new Book(title, l.getShelfNum(genre)));
+         updateTable();
+         updateLocalStorage();
       });
       
+      destination = $('body');
+      destination.append(addTitle);
+      destination.append(addGenre);
+      destination.append(addButton);
 }
