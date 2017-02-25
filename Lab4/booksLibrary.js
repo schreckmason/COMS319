@@ -2,7 +2,7 @@
 var handleBookClick = function(){
    var book = l.findBook(this.id);
    if(book){
-      if(!getUser()=='admin'){
+      if(getUser()!='admin'){
          if(book.availability){
             // not checked out
             console.log("not checked out");
@@ -102,7 +102,7 @@ class Library{
    
    getShelfNum(shelfName){
       shelfName = shelfName.charAt(0).toUpperCase() + shelfName.slice(1).toLowerCase();
-      return this.shelfNames.findIndex(function(name){name==shelfName});
+      return this.shelfNames.findIndex(function(name){return name==shelfName;});
    }
 }
 
@@ -134,7 +134,7 @@ class Book{
 
 
 var initLibrary = function(){
-   // localStorage.removeItem('lib');//reset library
+   //localStorage.removeItem('lib');//uncomment to reset library
    var libData = localStorage.getItem('lib');
    if(libData){
       l = new Library(libData);
