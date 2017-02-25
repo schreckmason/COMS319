@@ -214,7 +214,12 @@ var generateLibrarianFields = function(){
       addButton.click(function(){
          var title = $('#titleBox').val(); 
          var genre = $('#genreBox').val();
-         l.addBook(new Book(title, l.getShelfNum(genre)));
+         var shelfNum = l.getShelfNum(genre);
+         if(shelfNum != -1){
+            l.addBook(new Book(title, shelfNum));
+         } else {
+            alert(genre + " is not a valid Shelf.");
+         }
          updateTable();
          updateLocalStorage();
       });
