@@ -3,17 +3,34 @@
 $.fn.exists = function () {
     return this.length !== 0;
 }
-//var testObj = {title: "trial post 1", message:"I just want to see how this is formatted as a json object.",author: "Tyler", time:"3-12-16 3:05pm"};
-//var testObj2 = {"title":"another post","message":"s'more text to see how this works.","author":"Drake","time":"3-12-16 3:14pm"};
-//var myConvertedObject = JSON.stringify([testObj,testObj2]);
-//console.log(myConvertedObject);
 
 $(document).ready(function() {
    $("#submitLogin").click(checkLogin);
+   $("#newSignUp").click(createUser);
 });
 
+//Do signup here
+createUser = function(){
+    var sName = $("#name").val();
+    var pswd = $("#password").val();
+    $.post("../php/createUser.php",
+           {
+            name : sName,
+            password : pswd
+           },
+           function(response,status){
+            if(response === "success"){
+                window.location='./login.php';
+            }
+            else{
+                //should only fail if user already exists
+            }
+           }
+           );
+};
+
 checkLogin = function() {
-   $.post("checkLogin.php", {name : $("#name").val(), password : $("#password").val()}, 
+   $.post("../php/checkLogin.php", {name : $("#name").val(), password : $("#password").val()}, 
       function(data,status) { 
          if (JSON.parse(data) == "success") {
             viewPosts();
@@ -26,13 +43,13 @@ checkLogin = function() {
 };
 
 function viewPosts(){
-   $.post("viewPosts.php",
+   $.post("../php/viewPosts.php",
       function(data,status){
          //handle signInDiv
          if(!$("#destroy").exists()){
             $("#signInDiv").html("<input id=\"destroy\" type=\"button\" value=\"Logout\"/><br><br>");
             $("#destroy").click(function () {
-               $.post("logout.php", null, 
+               $.post("../php/logout.php", null, 
                   function(data,status) { 
                      location.reload();
                });
@@ -50,10 +67,6 @@ function viewPosts(){
                }
             })());
          }
-         //$("#entry0").click(function () {
-         // var tr0 = $("tr").eq(0);
-         // editPost(tr0);
-         //});
          createMakePostButton();
    });
 };
@@ -81,7 +94,7 @@ function makeEditDialogue(domTableRow){
 function editPost(domTableRow){
    var post = makeEditDialogue(domTableRow);
    //send the updated post to server with updatePosts.php
-   $.post("updatePosts.php",post,function(data,status){
+   $.post("../php/updatePosts.php",post,function(data,status){
       viewPosts();
    });
 }
@@ -94,7 +107,7 @@ var createNewPostForm = function (){
    $("#createPostDiv").html(newPostForm);
    $("#submitCreatePost").click(function () {
       var newPost = {title: $("#postTitle").val(), message:$("#postMsg").val(),author: "", time: new Date().toUTCString()};
-      $.post("updatePosts.php", newPost,function(data,status){
+      $.post("../php/updatePosts.php", newPost,function(data,status){
          console.log(data);
          viewPosts();
          createMakePostButton();

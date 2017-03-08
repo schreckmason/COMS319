@@ -4,7 +4,7 @@ session_start();
 //$_SESSION["username"];
 //var_dump($_REQUEST)
 
-$posts = json_decode(file_get_contents("posts.txt"));
+$posts = json_decode(file_get_contents("../TextFiles/posts.txt"));
  for($i = 0;$i<count($posts);$i++) {
    if($posts[$i]->title == $_REQUEST["title"]){
       $posts[$i]->message = $_REQUEST["message"];
@@ -20,6 +20,6 @@ $newPost = (object) array('title' => $_REQUEST["title"],
                   'time' => $_REQUEST["time"]);
 $newPost -> author = $_SESSION["username"];
 $posts[] = $newPost;
-file_put_contents("posts.txt",json_encode($posts));
+file_put_contents("../TextFiles/posts.txt",json_encode($posts));
 //echo "-----------END OF UPDATPOSTS.PHP----------";
 ?>
