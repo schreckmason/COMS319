@@ -19,9 +19,9 @@
 
          <table id="posts"></table>
 
-         <div id="createPostDiv">
-
-         </div>
+         <div id="createPostDiv"></div>
+         <div id="createMsgDiv"></div>
+         <div id="inboxDiv"></div>
 
       </div>
    </body>

@@ -42,7 +42,7 @@ $public_key = $publickey;
 
 $users = json_decode(file_get_contents("../TextFiles/users/passwords/public key/private key/users.txt"));
  for($i = 0;$i<count($users);$i++) {
-   if($users[$i]->name == $_REQUEST["name"]){
+   if($users[$i]->username == $_REQUEST["name"]){
       $users[$i]->password = $_REQUEST["password"];
       $users[$i]->pubKey = $public_key;
       $users[$i]->privKey = $private_key;
@@ -52,7 +52,7 @@ $users = json_decode(file_get_contents("../TextFiles/users/passwords/public key/
 }
 
 //Echo out results
-$newUser = (object) array('name' => $_REQUEST["name"],
+$newUser = (object) array('username' => $_REQUEST["name"],
                   'password' => $_REQUEST["password"],
                   'pubKey'=>$public_key,
                   'privKey'=>$private_key);

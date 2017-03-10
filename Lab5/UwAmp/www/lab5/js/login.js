@@ -24,20 +24,20 @@ createUser = function(){
 
 checkLogin = function() {
    $.post("../php/checkLogin.php", {name : $("#name").val(), password : $("#password").val()}, 
-      function(data,status) { 
-         if (JSON.parse(data) == "success") {
+      function(data, status) {
+        if(data == "success"){
             viewPosts();
-         }
-         else {
+        }
+        else{
             $("#tryAgain").html('<p style="color:red;">Wrong. Try Again</p>');
-         }
+        }
       }
    );
 };
 
 function viewPosts(){
    $.post("../php/viewPosts.php",
-      function(data,status){
+      function(data,status){        
          //handle signInDiv
          if(!$("#destroy").exists()){
             $("#signInDiv").html("<input id=\"destroy\" type=\"button\" value=\"Logout\"/><br><br>");
@@ -48,6 +48,19 @@ function viewPosts(){
                });
             });
          }
+         
+        //append inbox button
+        if(!$("#inboxButton").exists()){
+            $("#inboxDiv").html("<input id=\"inboxButton\" type=\"button\" value=\"Inbox\"/><br><br>");
+            $("#inboxButton").click(function(){
+                $.post("../php/inbox.php", null,
+                       function(data,status){
+                        //alert(data);
+                        console.log(data);
+                });
+            });
+        }
+         
          //handle posts table
          $("#posts").html(data);
          var tableSize = $('#posts tbody tr').length;
@@ -61,6 +74,7 @@ function viewPosts(){
             })());
          }
          createMakePostButton();
+         createMessageButton();
    });
 };
 
@@ -93,7 +107,6 @@ function editPost(domTableRow){
 }
 
 var createNewPostForm = function (){
-
    var newPostForm = "Title: <input id=\"postTitle\" type=\"text\" name=\"name\" value=\"\"/><br>"+
    "Message: <input id=\"postMsg\" type=\"text\" name=\"password\" value=\"\"/><br>"+
    "<input id=\"submitCreatePost\" type=\"button\" value=\"Post\"/>";
@@ -112,4 +125,26 @@ var createMakePostButton = function (){
    $("#createPost").click(function (){
       createNewPostForm();
    });
+}
+
+var createNewMessageForm = function(){
+   var newMsgForm = "To: <input id=\"msgRecipient\" type=\"text\" value=\"\"/><br>"+
+   "Body: <input id=\"msgContent\" type=\"text\" value=\"\"/><br>"+
+   "<input id=\"sendMsg\" type=\"button\" value=\"Send\"/>";
+   $("#createMsgDiv").html(newMsgForm);
+   $("#sendMsg").click(function () {
+        var newMessage = {recipient: $("#msgRecipient").val(), message: $("#msgContent").val()};
+        $.post("../php/sendMessage.php",newMessage,function(response,status){
+           console.log(response);
+           viewPosts();
+           createMessageButton();
+        });
+   });
+}
+
+var createMessageButton = function(){
+    $("#createMsgDiv").html("<input id=\"createMsg\" type=\"button\" value=\"Draft Msg\"/>");
+    $("#createMsg").click(function(){
+        createNewMessageForm();
+    });
 }
