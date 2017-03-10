@@ -1,0 +1,7 @@
+This will be where we design and deploy the second portfolio.
+Please list ideas you woud like to work on below:
+1. Student Programming Assistant (provide web environment for students to work on a difficult programming aspect)
+2.
+3.
+4.
+
