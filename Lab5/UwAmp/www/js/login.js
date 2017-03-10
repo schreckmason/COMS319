@@ -11,22 +11,15 @@ $(document).ready(function() {
 
 //Do signup here
 createUser = function(){
-    var sName = $("#name").val();
-    var pswd = $("#password").val();
-    $.post("../php/createUser.php",
-           {
-            name : sName,
-            password : pswd
-           },
-           function(response,status){
-            if(response === "success"){
-                window.location='./login.php';
-            }
-            else{
-                //should only fail if user already exists
-            }
-           }
-           );
+    var newUser = {name: $("#name").val(), password: $("#password").val()};
+      $.post("../php/createUser.php", newUser ,function(response,status){
+         if(response =="success"){
+            window.location="../php/login.php";
+         }
+         else{
+            //should only fail if user already exists
+         }
+      });
 };
 
 checkLogin = function() {
