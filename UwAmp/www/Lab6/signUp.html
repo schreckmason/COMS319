@@ -1,24 +1,47 @@
 <html>
-
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 <form name="myForm" action="library.php">
-	User Name:
-	<input type="text" name="username" required><br>
-	Password:
-	<input type="text" name="password" required><br>
-	Confirm Password:
-	<input type="text" name="conPassword" required><br>
-	Email:
-	<input type="text" name="email" pattern=[][] required><br>
-	Phone:
-	<input type="text" name="phone" pattern=[][]><br>
-	Librarian:
-	<input type="checkbox" name="librarian"><br>
-	First Name:
-	<input type="text" name="firstname" required><br>
-	Last Name:
-	<input type="text" name="lastname" required><br>
-	<input type="submit" value="Sign Up">
+   User Name:
+   <input id="usernameField" type="text" required><br>
+   Password:
+   <input id="passwordField" type="text"required><br>
+   Confirm Password:
+   <input id="confirmPwdField" type="text" required><br>
+   Email:
+   <input id="emailField" type="text" pattern="[A-Za-z0-9]{3}@[A-Za-z0-9]{3}\.[A-Za-z0-9]{3}" required><br>
+   Phone:
+   <input id="phoneField" type="text" pattern="[][]"><br>
+   Librarian:
+   <input id="librarianCheckbox" type="checkbox"><br>
+   First Name:
+   <input id="firstNameField" type="text" required><br>
+   Last Name:
+   <input id="lastnameField" type="text" required><br>
+   
+   <input id="signUpButton" type="button" value="Sign Up">
 </form>
+<div id="responseDiv"></div>
 
+<script>
+   $(document).ready(function() {
+      $("#signUpButton").click(createUser);
+   });
+   function createUser() {
+      console.log($("#librarianCheckbox").checked);
+      $.post("http://proj-319-031.cs.iastate.edu:/var/www/php/createUser.php",
+         {
+            username : $("#usernameField").value,
+            password : $("#passwordField").value,
+            email: $("#emailField").value,
+            phone: $("#phoneField").value,
+            librarian: $("#librarianCheckbox").checked,
+            firstName: $("#firstNameField").value,
+            lastName: $("#lastnameField").value,
+         },
+         function(data,status){
+            $("#responseDiv").html(data);
+      });
+   }
+</script>
 
 </html>

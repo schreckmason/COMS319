@@ -4,10 +4,10 @@
 // USERNAME, PASSWORD, AND DATABASESERVER names
 // TODO: TRY USING THE CREDENTIALS SUPPLIED LATER IN THE EXERCISE
 
-$username = "root";
-$password = "abcdef";
-$dbServer = "127.0.0.1"; 
-$dbName   = "PlayingWithMySQL";
+$username = "dbu319team031";
+$password = "NjUxODA0OTAz";
+$dbServer = "mysql.cs.iastate.edu"; 
+$dbName   = "319db";
 
 // --------------------------------------
 // --- PART-1 --- CONNECT TO DATABASE ---
@@ -30,7 +30,8 @@ echo $mysqli->host_info . "<br>";
 // --------------------------------------
 // --- PART-2 --- INSERT DATA -----------
 // --------------------------------------
-$sql = "INSERT INTO userDetails (userID, userDetails) VALUES ('abc', 'john@example.com')";
+$sql = "INSERT INTO Users ('UserName','Password','Email','Phone','Librarian','FirstName','LastName') ".
+   "VALUES ('dmossman','fluffy67','dmossman@iastate.edu','3199394514','1','Drake','Mossman')";
 
 if ($conn->query($sql) === TRUE) {
     echo "New record created successfully<br>";
@@ -42,14 +43,14 @@ if ($conn->query($sql) === TRUE) {
 // --------------------------------------
 // --- PART-3 --- GET DATA --------------
 // --------------------------------------
-$sql = "SELECT * FROM userDetails";
+$sql = "SELECT * FROM Users";
 
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     // output data of each row
     while($row = $result->fetch_assoc()) {
-        echo "userID: " . $row["userID"]. "  userDetails: " . $row["userDetails"]. "<br>";
+        echo "UserName: " . $row["UserName"]. "  Phone: " . $row["Phone"]. "<br>";
     }
 } else {
     echo "0 results";
