@@ -1,1 +1,1 @@
-[{"title":"Creation","message":"To touch the sky, one must stand on the shoulder of giants","author":"schreck","time":"Wed, 08 Mar 2017 08:47:33 GMT"}]
+[{"title":"asdf","message":"asdf","author":"mason","time":"Fri, 10 Mar 2017 10:26:58 GMT"},{"title":"hi","message":"world","author":"drake","time":"Fri, 10 Mar 2017 10:34:23 GMT"},{"title":"free","message":"asdf","author":"mason","time":"Fri, 10 Mar 2017 10:35:07 GMT"},{"title":"dicksneeze","message":"snuffleupugus","author":"mason","time":"Fri, 10 Mar 2017 10:35:22 GMT"}]
