@@ -56,7 +56,8 @@ function viewPosts(){
                 $.post("../php/inbox.php", null,
                        function(data,status){
                         //alert(data);
-                        console.log(data);
+                        // console.log(data);
+                        $("#messages").html(data);
                 });
             });
         }

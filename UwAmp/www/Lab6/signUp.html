@@ -28,7 +28,7 @@
    });
    function createUser() {
       console.log($("#librarianCheckbox").checked);
-      $.post("http://proj-319-031.cs.iastate.edu:/var/www/php/createUser.php",
+      $.post("createUser.php",
          {
             username : $("#usernameField").value,
             password : $("#passwordField").value,

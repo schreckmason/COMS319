@@ -22,7 +22,8 @@
          <div id="createPostDiv"></div>
          <div id="createMsgDiv"></div>
          <div id="inboxDiv"></div>
-
+         
+         <table id="messages"></table>
       </div>
    </body>
 </html>

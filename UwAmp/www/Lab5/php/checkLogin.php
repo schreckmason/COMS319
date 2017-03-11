@@ -3,7 +3,7 @@
 $username = $_REQUEST["name"];
 $password = $_REQUEST["password"];
 //Get an array of user json representations
-$users = json_decode(file_get_contents("../TextFiles/users/passwords/public key/private key/users.txt"));
+$users = json_decode(file_get_contents("../TextFiles/users.txt"));
 if($username==="admin" || $username==="Admin"){
     echo "success";
 }
