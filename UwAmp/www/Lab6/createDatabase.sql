@@ -1,10 +1,10 @@
-drop table Users;
-drop table Book;
-drop table LoanHistory;
-drop table Shelf;
+drop table users;
+drop table books;
+drop table loanHistory;
+drop table shelves;
 drop table BookLocation;
 
-create table Users(
+create table users(
 	UserName VARCHAR(255),
 	Password VARCHAR(255),
 	Email VARCHAR(255),
@@ -14,22 +14,22 @@ create table Users(
 	LastName VARCHAR(255),
     Primary Key (UserName));
 
-create table Books(
+create table books(
 	BookId INT(10),
 	BookTitle VARCHAR(255),
 	Author VARCHAR(255),
 	Availablity TINYINT,
     Primary Key (BookId));
 
-create table LoanHistory(
-	UserName VARCHAR(255),
+create table loanHistory(
+	userName VARCHAR(255),
 	BookId INT(10),
 	DueDate DATE,
 	ReturnedDate DATE,
     Primary Key (UserName));
 
-create table Shelves(
-	ShelfId INT(10),
+create table shelves(
+	shelfId INT(10),
 	ShelfName VARCHAR(255),
     Primary Key (ShelfId));
     
