@@ -1,6 +1,7 @@
 <html>
     <link rel="stylesheet" href="../css/signup.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!--Everything is wrapped in a seperate div in case we want to do error reporting based upon those specific input areas-->
     <div id="mainDiv">
         <h1>Register Yo'Self</h1>
         <p><div id="userDiv">User Name: <input id="username" type="text" pattern="[A-Za-z0-9]" required></div></p>
@@ -27,7 +28,7 @@
            $("#connectButton").click(function(){
             //store isLib as 0 - false or 1-true
             var islib;
-            if($("#librarian").checked){islib=1;}
+            if($("#librarian").val()=='on'){islib=1;}
             else{islib=0;}
             var user = {userName: $("#username").val(), password: $("#password").val(), passConfirm: $("#passConfirm").val(), email: $("#email").val(),
             phone: $("#phone").val(), isLib: islib, fName: $("#firstName").val(), lName: $("#lastName").val()};
