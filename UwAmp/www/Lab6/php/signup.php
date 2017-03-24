@@ -34,7 +34,7 @@
             phone: $("#phone").val(), isLib: islib, fName: $("#firstName").val(), lName: $("#lastName").val()};
                 $.post("./register.php",user,
                        function(response, status){
-                        $('#statusDiv').html(response);
+                        $('#statusDiv').html(response);//TODO: Redirect to login?
                        });
                 
            });
