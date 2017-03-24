@@ -23,23 +23,31 @@ createUser = function(){
 };
 
 checkLogin = function() {
-   $.post("../php/checkLogin.php", {name : $("#name").val(), password : $("#password").val()}, 
+   var userName = $("#name").val();
+   if(userName.toLowerCase() == "admin"){
+      userName = "Admin";
+   }
+   $.post("../php/checkLogin.php", {name : userName, password : $("#password").val()}, 
       function(data, status) {
-        if(data == "success"){
+         if(data == "success"){
+            console.log("successful login");
+            //store username for later
+            localStorage.username = userName;
             viewPosts();
-        }
-        else{
+         } else {
             $("#tryAgain").html('<p style="color:red;">Wrong. Try Again</p>');
-        }
+         }
       }
    );
 };
 
 function viewPosts(){
    $.post("../php/viewPosts.php",
-      function(data,status){        
+      function(data,status){
+               
          //handle signInDiv
          if(!$("#destroy").exists()){
+            //replace signInDiv contents with logout button
             $("#signInDiv").html("<input id=\"destroy\" type=\"button\" value=\"Logout\"/><br><br>");
             $("#destroy").click(function () {
                $.post("../php/logout.php", null, 
@@ -49,18 +57,16 @@ function viewPosts(){
             });
          }
          
-        //append inbox button
-        if(!$("#inboxButton").exists()){
+         //append inbox button
+         if(!$("#inboxButton").exists()){
             $("#inboxDiv").html("<input id=\"inboxButton\" type=\"button\" value=\"Inbox\"/><br><br>");
             $("#inboxButton").click(function(){
                 $.post("../php/inbox.php", null,
                        function(data,status){
-                        //alert(data);
-                        // console.log(data);
                         $("#messages").html(data);
                 });
             });
-        }
+         }
          
          //handle posts table
          $("#posts").html(data);
@@ -74,21 +80,13 @@ function viewPosts(){
                }
             })());
          }
+         $("#inboxButton").click();
          createMakePostButton();
          createMessageButton();
    });
 };
 
-function makeEditDialogue(domTableRow){
-   //domTableRow is a dom element containing the post to edit
-   var td = domTableRow.find("td").eq(0);
-   //var post = JSON.parse(postJson);
-   var divs = td.find("div");
-   var post = new Object();
-   post.title = divs.eq(0).html();
-   post.author = divs.eq(1).html();
-   post.time = divs.eq(2).html();
-   post.message = divs.eq(3).html();
+function makeEditDialogue(post){
    var newMsg = prompt("Edit post: " + post.title + "\n" +
    "Original post by " + post.author + " at " + post.time,
    post.message);
@@ -100,11 +98,35 @@ function makeEditDialogue(domTableRow){
 }
 
 function editPost(domTableRow){
-   var post = makeEditDialogue(domTableRow);
-   //send the updated post to server with updatePosts.php
-   $.post("../php/updatePosts.php",post,function(data,status){
-      viewPosts();
-   });
+   //domTableRow is a dom element containing the post to edit
+   var td = domTableRow.find("td").eq(0);
+   var divs = td.find("div");
+   var post = new Object();
+   post.title = divs.eq(0).html();
+   post.author = divs.eq(1).html();
+   post.time = divs.eq(2).html();
+   post.message = divs.eq(3).html();
+   
+   if(localStorage.username == "Admin"){
+      //delete post
+      var deleteConfirm = confirm("Are you sure you want to delete this post?\n" +
+         post.title + "\n" + post.message + "\nby: " + post.author);
+      if (deleteConfirm){
+         post.action = "delete";
+      }
+   } else if(post.author == localStorage.username) {
+      var post = makeEditDialogue(post);
+      post.action = "update";
+   } else {
+      //can't edit other people's posts.
+   }
+   
+   if(post.action){
+      //send the updated post to server with updatePosts.php
+      $.post("../php/updatePosts.php",post,function(data,status){
+         viewPosts();
+      });
+   }
 }
 
 var createNewPostForm = function (){
@@ -113,7 +135,7 @@ var createNewPostForm = function (){
    "<input id=\"submitCreatePost\" type=\"button\" value=\"Post\"/>";
    $("#createPostDiv").html(newPostForm);
    $("#submitCreatePost").click(function () {
-      var newPost = {title: $("#postTitle").val(), message:$("#postMsg").val(),author: "", time: new Date().toUTCString()};
+      var newPost = {title: $("#postTitle").val(), message:$("#postMsg").val(),author: "", time: new Date().toUTCString(), action: "create"};
       $.post("../php/updatePosts.php", newPost,function(data,status){
          console.log(data);
          viewPosts();

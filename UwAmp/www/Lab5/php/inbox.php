@@ -51,7 +51,7 @@ $messages = json_decode(file_get_contents($messageFile));
 for($i = 0;$i<count($messages);$i++) {
    if($messages[$i]->recipient == $_SESSION["username"]){
       //If this message is for me
-      $msg = rsa_decrypt($messages[$i]->encryptedMessage, $pubKey);//decrypt it with my public key
+      $msg = rsa_decrypt($messages[$i]->encryptedMessage, $privKey); //decrypt it with my private key
       echo "<tr><td><div>From: ".$messages[$i]->sender."</div><div>".$msg."</div><br><br></td></tr>";
    }
 }
