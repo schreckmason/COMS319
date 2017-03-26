@@ -37,3 +37,8 @@ create table bookLocation(
 	BookId INT(10),
 	ShelfId INT(10),
     Primary Key (BookId));
+    
+INSERT INTO shelves (shelfId, ShelfName) VALUES (0, 'Art');
+INSERT INTO shelves (shelfId, ShelfName) VALUES (1, 'Science');
+INSERT INTO shelves (shelfId, ShelfName) VALUES (2, 'Sport');
+INSERT INTO shelves (shelfId, ShelfName) VALUES (3, 'Literature');
