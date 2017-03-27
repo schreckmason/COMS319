@@ -1,0 +1,16 @@
+Mason:
+- super awesome style points
+- login functionality
+- create user functionality
+- inbox functionality
+
+Drake:
+- logical flow of pages
+- helped work on messaging
+- program infrastructure
+- final touches
+
+Labor of Love:
+We started from a loose frame however we cannot say distinctively who made what files.
+Drake provided functionality that Mason tied together and then Drake touched up some rough spots.
+And it was an iterative process. 
