@@ -4,4 +4,6 @@
     <script src="../js/library.js"></script>
     <h1>Welcome to the Library!</h1>
 </head>
+<body>
+</body>
 </html>

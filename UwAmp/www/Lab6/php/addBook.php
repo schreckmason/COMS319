@@ -58,7 +58,7 @@ $book = new Book($_REQUEST["title"], $_REQUEST["author"]);
 // ---     INSERT BOOK INTO BOOKS     ---
 // --------------------------------------
 
-$sql = "INSERT INTO books (BookId, BookTitle, Author, Availablity) VALUES (\"".$book->id."\", \"".$book->title."\", \"".$book->author."\", 1)";
+$sql = "INSERT INTO books (BookId, BookTitle, Author, Availability) VALUES (\"".$book->id."\", \"".$book->title."\", \"".$book->author."\", 1)";
 
 if ($conn->query($sql) === TRUE) {
     echo "Book inserted into books successfully<br>";

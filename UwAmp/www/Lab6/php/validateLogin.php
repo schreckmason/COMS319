@@ -25,16 +25,14 @@ if(count($row)!=0){
         $_SESSIONS["username"] = $user;//store username for the session
         $_SESSIONS["isLibrarian"] = $row["Librarian"];//store whether or not the user is a librarian
         echo "Success";
-        //REDIRECT TO library.php
-        return;
-    }
-    else{
+    } else {
         //echo "The password or username entered do not match.";
         echo "Failure";
     }
+} else {
+   echo "Failure";
 }
 
-
-//$conn->close();
+$conn->close();
 
 ?>

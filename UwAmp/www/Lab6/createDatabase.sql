@@ -18,7 +18,7 @@ create table books(
 	BookId INT(10),
 	BookTitle VARCHAR(255),
 	Author VARCHAR(255),
-	Availablity TINYINT,
+	Availability TINYINT,
     Primary Key (BookId));
 
 create table loanHistory(

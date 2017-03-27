@@ -147,8 +147,8 @@ var initLibrary = function(){
 
 $(document).ready( function () {
    //No matter the credentials the table needs to be generated first
-   let l;
-   initLibrary();
+   // let l;
+   // initLibrary();
    
    tablePlaceHolder = $("<div id='table'/>");
    descDiv = $("<div id='bookDescription' />");
@@ -157,12 +157,16 @@ $(document).ready( function () {
    $('body').append(descDiv);
    $('body').append($('<br/>'));
    
-   updateTable();
+   $.post("getBooks.php", {},
+      function(data,status){
+         $("#table").html(data);
+      });
+   // updateTable();
    
-   if(getUser()==='admin'){
-      //generate librarian view
-      generateLibrarianFields();
-   }
+   // if(getUser()==='admin'){
+      // //generate librarian view
+      // generateLibrarianFields();
+   // }
 });
 
 /* --------------------------------------------- GUI Functions --------------------------------------------------------*/
