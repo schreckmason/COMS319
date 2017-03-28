@@ -1,7 +1,10 @@
 <?php
-//Return json containing books and shelves
+//Return table containing books in shelves
 
-/*
+// --------------------------------------
+// ---       CLASS DESCRIPTIONS       ---
+// --------------------------------------
+
 class Book {
    public $title; 
    public $author;
@@ -20,69 +23,33 @@ class Shelf {
   public $name;
   public $books;
 
-  function __construct($name) {
-   $this->name = $name;
-   $this->books = array();
-  }
-  
-  // function hasSpace() {
-   // return count($books)<self::CAPACITY;
-  // }
-  
-   function addBook($book, $id) {
-      $books[$id] = $book;
+   function __construct($name) {
+      $this->name = $name;
+      $this->books = array();
    }
-  
-  // function hasBook($id) {
-   // return $books[$id] != null;
-  // }
-  
-  // function deleteBook($id) {
-   // unset($books[$id]);
-  // }
+   
+   function addBook($book, $id) {
+      $this->books[$id] = $book;
+   }
 }
 
 
 class Library {
-public $shelves; // array
+   public $shelves; // array
 
-function __construct() {
-   $this->shelves = array();
+   function __construct() {
+      $this->shelves = array();
+   }
+
+   function addShelf($shelf, $id) {
+      $this->shelves[$id] = $shelf;
+   }
+
+   function addBook($book, $ShelfId, $BookId) {
+      $this->shelves[$ShelfId]->addBook($book, $BookId);
+   }
 }
 
-function addShelf($shelf, $id) {
-   $shelves[$id] = $shelf;
-}
-  //return number of shelf containing book
-  // function findShelf($id) {
-   // for($i = 0;$i<count($shelves);$i++){
-     // if($shelves[$i]->hasBook($id)){
-       // return $i;
-     // }
-   // }  
-  // }
-  
-  // function addBook($id,$title,$author) {
-   // $book = new Book($id,$title,$author);
-   // for($i = 0;$i<count($shelves);$i++){
-     // if($shelves[$i]->hasSpace()){
-       // $shelves[$i]->addBook($book);
-     // }
-   // }  
-  // }
-  
-  // function deleteBook($id) {
-    // $shelves[findShelf($id)]->deleteBook($id);
-  // }
-  
-  // function borrow
-}
-
-
-
-
-
-*/
 // --------------------------------------
 // ---      CONNECT TO DATABASE       ---
 // --------------------------------------
@@ -98,53 +65,49 @@ $conn = new mysqli($dbServer, $username, $password, $dbName);
 // Check connection
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
-} else {
-  // echo "Connected successfully<br>";
-  // echo $conn->host_info . "<br><br>";
 }
 
-
-
-//--------------------------------------------------------------------------------------------------------
-//          TODO: Need to change so that we put query results in classes first to make use of them.
-//--------------------------------------------------------------------------------------------------------
 // --------------------------------------
-// ---       QUERY FOR SHELVES        ---
+// ---       QUERY INTO OBJECTS       ---
 // --------------------------------------
-/*
+
 //Create Library
 $lib = new Library();
-//Fill with shelves
+//Fill with shelves (Should only be 4)
 $sql = "SELECT * FROM shelves";
 $result = $conn->query($sql);
 while($row = $result->fetch_assoc()) {
    $lib->addShelf(new Shelf($row["ShelfName"]), $row["ShelfId"]);
 }
-
-$sql = "SELECT books.BookId, BookTitle, Author, Availability, shelves.ShelfId, ShelfName ".
-       "FROM books, booklocation, shelves ".
-       "WHERE books.BookId = booklocation.BookId and shelves.ShelfId = booklocation.ShelfId";
+//Fill with Books
+$sql = "SELECT books.BookId, BookTitle, Author, Availability, ShelfId ".
+       "FROM books, booklocation ".
+       "WHERE books.BookId = booklocation.BookId";
 $result = $conn->query($sql);
 while($row = $result->fetch_assoc()) {
-   echo "BookTitle: " . $row["BookTitle"]. "  Author: " . $row["Author"]. "<br>";
+   $lib->addBook(new Book($row["BookTitle"], $row["Author"], $row["Availability"]), $row["ShelfId"], $row["BookId"]);
 }
 
-*/
 // --------------------------------------
-// ---        QUERY FOR BOOKS         ---
+// ---       OUTPUT HTML TABLE        ---
 // --------------------------------------
 
-$sql = "SELECT books.BookId, BookTitle, Author, Availability, ShelfId FROM books, booklocation WHERE books.BookId = booklocation.BookId and ShelfId = ";
-$shelfResults = array($conn->query($sql."0"), $conn->query($sql."1"), $conn->query($sql."2"), $conn->query($sql."3"));
-
-echo "<table border='2'><tr><th>Art</th><th>Science</th><th>Sport</th><th>Literature</th></tr>";
+foreach($lib->shelves as &$shelf){
+   reset($shelf->books); //reset the iterator to the beginning of the list
+}
+echo "<table border='2'><tr><th>Art</th><th>Science</th><th>Sport</th><th>Literature</th></tr>";//TODO:change to print from obj?
 for($i=0;$i<20;$i++){
    echo "<tr>";
-   foreach($shelfResults as &$shelfResult){
-      $shelfBook = $shelfResult->fetch_assoc();
-      if($shelfBook){
+   foreach($lib->shelves as &$shelf){
+      if(list($bookId, $book) = each($shelf->books)){
          //There is another book in this shelf
-         echo "<td id=".$shelfBook["BookId"].">".$shelfBook["BookTitle"]."</td>";
+         // echo "BookId: ".$bookId."\n";
+         // echo "Book: ".$book."\n";
+         echo "<td id=".$bookId.
+              " author='".$book->author."'".
+              " availability=".$book->availability.
+              " bgcolor='".($book->availability==1?"#FFFFFF":"#FF9999")."'".
+              " >".$book->title."</td>";
       } else {
          echo "<td></td>";
       }
@@ -153,3 +116,6 @@ for($i=0;$i<20;$i++){
 }
 echo "</table>";
 ?>
+<script>
+
+</script>
