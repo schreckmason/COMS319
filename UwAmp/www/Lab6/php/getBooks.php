@@ -8,12 +8,14 @@
 class Book {
    public $title; 
    public $author;
-   public $availability;
+   public $availability; //true or name of person who has it borrowed
+   public $borrowedBy; //string if availability is true, NULL otherwise
 
    function __construct($title, $author, $availability) {
       $this->title = $title;
       $this->author = $author;
       $this->availability = $availability;
+      $this->borrowedBy = NULL;
    }
 }
 
@@ -85,9 +87,18 @@ $sql = "SELECT books.BookId, BookTitle, Author, Availability, ShelfId ".
        "WHERE books.BookId = booklocation.BookId";
 $result = $conn->query($sql);
 while($row = $result->fetch_assoc()) {
-   $lib->addBook(new Book($row["BookTitle"], $row["Author"], $row["Availability"]), $row["ShelfId"], $row["BookId"]);
+   $lib->addBook(new Book($row["BookTitle"], $row["Author"], $row["Availability"]==1), $row["ShelfId"], $row["BookId"]);
 }
-
+//Set borrowedBy for checked out books
+$sql = "SELECT booklocation.BookId, UserName, ShelfId ".
+       "FROM loanhistory, booklocation ".
+       "WHERE booklocation.BookId = loanhistory.BookId ".
+       "AND ReturnedDate IS NULL";
+$result = $conn->query($sql);
+while($row = $result->fetch_assoc()) {
+   $lib->shelves[$row["ShelfId"]]->books[$row["BookId"]]->borrowedBy = $row["UserName"];
+}
+// echo json_encode($lib);
 // --------------------------------------
 // ---       OUTPUT HTML TABLE        ---
 // --------------------------------------
@@ -95,7 +106,7 @@ while($row = $result->fetch_assoc()) {
 foreach($lib->shelves as &$shelf){
    reset($shelf->books); //reset the iterator to the beginning of the list
 }
-echo "<table border='2'><tr><th>Art</th><th>Science</th><th>Sport</th><th>Literature</th></tr>";//TODO:change to print from obj?
+echo "<table id='table' border='2'><tr><th>Art</th><th>Science</th><th>Sport</th><th>Literature</th></tr>";//TODO:change to print from obj?
 for($i=0;$i<20;$i++){
    echo "<tr>";
    foreach($lib->shelves as &$shelf){
@@ -103,10 +114,13 @@ for($i=0;$i<20;$i++){
          //There is another book in this shelf
          // echo "BookId: ".$bookId."\n";
          // echo "Book: ".$book."\n";
-         echo "<td id=".$bookId.
+         echo "<td".
+              " id=".$bookId.
               " author='".$book->author."'".
-              " availability=".$book->availability.
+              " availability=".($book->availability?"true":"false").
+              ($book->availability?"":" borrowedBy='".$book->borrowedBy."'").
               " bgcolor='".($book->availability==1?"#FFFFFF":"#FF9999")."'".
+              // " onclick='handleBookClick()'".
               " >".$book->title."</td>";
       } else {
          echo "<td></td>";
@@ -117,5 +131,23 @@ for($i=0;$i<20;$i++){
 echo "</table>";
 ?>
 <script>
-
+   var handleBookClick = function(){
+      var desc = this.textContent + " is written by " + this.getAttribute("author") +
+         " and is currently " + (this.getAttribute("availability")=="true"? "on the shelf": "checked out by " + this.getAttribute("borrowedBy")) + ".";
+      $('#bookDescription').text(desc);
+      selectTableCell(this);
+   }
+   
+   cellSelection = undefined;
+   var selectTableCell = function(tableCell){
+      if(cellSelection != undefined){
+         cellSelection.bgColor = cellSelection.getAttribute("availability")=="true"?'#FFFFFF':'#FF9999';
+      }
+      tableCell.bgColor = '#BBBBBFF';
+      cellSelection = tableCell;
+   }
+   
+   $(document).ready( function () {
+      $("#table td").filter(function(i, el){return el.textContent!="";}).click(handleBookClick);//set click handler for non-empty table cells
+   });
 </script>

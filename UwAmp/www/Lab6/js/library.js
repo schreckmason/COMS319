@@ -1,43 +1,5 @@
 /* --------------------------------------------- Handler functions --------------------------------------------------------*/
-var handleBookClick = function(){
-   var book = l.findBook(this.id);
-   if(book){
-      if(getUser()!='admin'){
-         if(book.availability){
-            // not checked out
-            console.log("not checked out");
-            if(numCheckedOutBooks() < 2){
-               book.borrowedBy = getUser();
-               book.availability = 0;
-               this.bgColor = '#FF4444';//change cell to red
-            } else {
-               console.log("I already have " + numCheckedOutBooks() + " books checked out!");
-            }
-         } else {
-            if(book.borrowedBy == getUser()){
-               //checked out by me
-               book.availability = 1;
-               book.borrowedBy = undefined;
-               this.bgColor = '#FFFFFF';//change cell to white
-               console.log("Returned it.");
-            } else {
-               console.log("checked out by someone else...");
-               //checked out by someone else
-            }
-         }
-         updateLocalStorage();
-      }
-      $('#bookDescription').text(getBookDescription(book));
-   } else {
-      console.log("couldn't find book");
-   }
-}
 
-var getBookDescription = function(book){
-   var desc = book.title + " is a " + l.shelfNames[book.id%4] + " book ";
-   desc += "which is currently " + (book.availability? "on the shelf.": "checked out by " + book.borrowedBy + ".");
-   return desc;
-}
 
 var numCheckedOutBooks = function(){
    var count = 0;
@@ -150,7 +112,7 @@ $(document).ready( function () {
    // let l;
    // initLibrary();
    
-   tablePlaceHolder = $("<div id='table'/>");
+   tablePlaceHolder = $("<div id='tableDiv'/>");
    descDiv = $("<div id='bookDescription' />");
    $('body').append(tablePlaceHolder);
    $('body').append($('<br/>'));
@@ -159,7 +121,7 @@ $(document).ready( function () {
    
    $.post("getBooks.php", {},
       function(data,status){
-         $("#table").html(data);
+         $("#tableDiv").html(data);
       });
    // updateTable();
    
@@ -207,6 +169,10 @@ var updateTable = function(){
    
    destination = $('#table');
    destination.replaceWith(bookTable); 
+}
+
+var setTableClickHandlers = function(){
+   $("#table td").click(handleBookClick);
 }
 
 //generates the text boxes and button that are only displayed upon admin authentication, potentially need an anchor to insertBefore with
