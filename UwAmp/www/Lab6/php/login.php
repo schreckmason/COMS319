@@ -20,11 +20,14 @@
         //Post to PHP here
         $(document).ready(function(){
            $("#loginButton").click(function(){
-                var credentials={username: $("#inputUser").val(), password: $("#inputPass").val()};
+              var username = $("#inputUser").val();
+                var credentials={username: username, password: $("#inputPass").val()};
                 $.post("./validateLogin.php",credentials,
                        function(response,status){
                         //$("#statusDiv").html(response);//make the result viewable for now, when it is working have it redirect to new page for library
-                        if(response==="Success"){
+                        if(response==="Librarian" || response==="Student"){
+                           localStorage.setItem("userType", response);
+                           localStorage.setItem("user", username);
                             window.location.href = './library.php';
                         }else{
                             

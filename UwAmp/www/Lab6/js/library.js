@@ -1,117 +1,12 @@
-/* --------------------------------------------- Handler functions --------------------------------------------------------*/
-
-
-var numCheckedOutBooks = function(){
-   var count = 0;
-   var user = getUser();
-   l.shelves.forEach(function(shelf){
-         shelf.books.forEach(function(book){
-            if(book.borrowedBy == user)
-               count++;
-         });
-      });
-   return count;
-}
-
 var getUser = function(){
    return localStorage.getItem('user');
 }
 
-var updateLocalStorage = function(){
-   var libData = JSON.stringify(l)
-   localStorage.setItem("lib", libData);
+var userLibrarian = function(){
+   return localStorage.getItem('userType')=="Librarian";
 }
-
-/* --------------------------------------------- CLASS DEFINITIONS --------------------------------------------------------*/
-
-class Library{
-   
-   constructor(){
-      this.shelfNames = ["Art", "Science", "Sport", "Literature"];
-      if(arguments.length>0){
-         this.populateFromJson(arguments[0]);
-      } else {
-         this.shelves = [new Shelf(), new Shelf(), new Shelf(), new Shelf()];
-         for(var i=0; i<25; i++){
-            let b = new Book("B"+i);
-            this.addBook(b);
-         }
-      }
-   }
-   populateFromJson(jsonLib){
-      var libData = JSON.parse(jsonLib);
-      this.shelves = libData.shelves;
-      console.log(libData);
-   }
-
-   addBook(book){
-      console.log(book);
-      console.log(this.shelves);
-      this.shelves[book.id%4].books.push(book);
-   }
-   
-   findBook(bookID){
-      var foundBook = false;
-      this.shelves.forEach(function(shelf){
-         shelf.books.forEach(function(book){
-            if(book.id == bookID){
-               foundBook = book;
-            }
-         });
-      });
-      return foundBook;
-   }
-   
-   getShelfNum(shelfName){
-      shelfName = shelfName.charAt(0).toUpperCase() + shelfName.slice(1).toLowerCase();
-      return this.shelfNames.findIndex(function(name){return name==shelfName;});
-   }
-}
-
-class Shelf{
-   constructor(){
-      if(arguments.length > 0){
-         this.books = arguments[0];
-      } else {
-         this.books = [];
-      }
-   }
-}
-
-class Book{
-   constructor(title){
-      console.log(arguments);
-      this.title = title;
-      this.availability = 1;
-      this.borrowedBy = undefined;
-      this.id = Math.floor(Math.random() * 1000);
-      if(arguments.length == 2){
-         var shelfNum = arguments[1];
-         this.id = this.id - this.id%4 + shelfNum;
-      }
-   }
-}
-
-/* --------------------------------------------- Create Library --------------------------------------------------------*/
-
-
-var initLibrary = function(){
-   //localStorage.removeItem('lib');//uncomment to reset library
-   var libData = localStorage.getItem('lib');
-   if(libData){
-      l = new Library(libData);
-   } else {
-      l = new Library();
-   }
-}
-
-/* --------------------------------------------- Document Ready --------------------------------------------------------*/
 
 $(document).ready( function () {
-   //No matter the credentials the table needs to be generated first
-   // let l;
-   // initLibrary();
-   
    tablePlaceHolder = $("<div id='tableDiv'/>");
    descDiv = $("<div id='bookDescription' />");
    $('body').append(tablePlaceHolder);
@@ -119,83 +14,127 @@ $(document).ready( function () {
    $('body').append(descDiv);
    $('body').append($('<br/>'));
    
+   if(userLibrarian()){
+      generateLibrarianFields();
+   } else {
+      generateStudentFields();
+   }
+   
+   refreshTable();
+});
+
+var refreshTable = function(){
    $.post("getBooks.php", {},
       function(data,status){
          $("#tableDiv").html(data);
+         //set click handler for non-empty table cells
+         $("#table td").filter(function(i, el){return el.textContent!="";}).click(handleBookClick);
+         cellSelection = undefined;
+         setStudentButtons("unselected");
       });
-   // updateTable();
-   
-   // if(getUser()==='admin'){
-      // //generate librarian view
-      // generateLibrarianFields();
-   // }
-});
+}
 
-/* --------------------------------------------- GUI Functions --------------------------------------------------------*/
+var handleBookClick = function(){
+   var desc = this.textContent + " is written by " + this.getAttribute("author") +
+      " and is currently " + (this.getAttribute("availability")=="true"? "on the shelf": "checked out by " + this.getAttribute("borrowedBy")) + ".";
+   $('#bookDescription').text(desc);
+   selectTableCell(this);
+}
 
-var updateTable = function(){
-   var maxBooks = 0;
-   l.shelves.forEach(function(item){maxBooks = Math.max(item.books.length, maxBooks);});
-   var shelves = 4;
-   
-   //Table generation taken from test1.js but implemented with our class structure
-   bookTable = $("<table id='table' border='2'></table>"); // creates DOM elements
-   tableBody = $('<tbody></tbody>');
-   
-   for(var i=0;i<shelves;i++){
-      curr_row=$('<tr></tr>');
-      row_header = $('<th></th>');
-      row_header.append(l.shelfNames[i]);//set row name
-      curr_row.append(row_header);
-      
-      for(var j=0;j<maxBooks;j++){
-         curr_cell=$('<td></td>');
-         if(j<l.shelves[i].books.length){
-            //set onclick handler
-            curr_cell.click(handleBookClick);
-            var book = l.shelves[i].books[j];
-            curr_cell.append(book.title);
-            curr_cell.attr('id', book.id);
-            curr_cell.attr('bgColor', 
-               book.availability? '#FFFFFF':
-               (book.borrowedBy==getUser()? '#FF4444':
-               '#FFAAAA'));
-         }
-         curr_row.append(curr_cell);
-      }
-      tableBody.append(curr_row);
+var selectTableCell = function(tableCell){
+   var mode;
+   if(cellSelection != undefined){
+      // a cell is currently selected
+      cellSelection.bgColor = cellSelection.getAttribute("availability")=="true"?'#FFFFFF':'#FF9999'; //unselect cell
    }
-   bookTable.append(tableBody);
-   
-   destination = $('#table');
-   destination.replaceWith(bookTable); 
+   if(cellSelection == undefined || tableCell.id != cellSelection.id){
+      // selecting a new cell
+      tableCell.bgColor = '#BBBBBFF';
+      cellSelection = tableCell;
+      mode = tableCell.getAttribute("availability")=="true"?"available":(tableCell.getAttribute("borrowedBy")==getUser()?"borrowed":"unavailable");
+   } else {
+      // unselecting currently selected cell
+      cellSelection = undefined;
+      mode = "unselected"
+   }
+   setStudentButtons(mode);
 }
 
-var setTableClickHandlers = function(){
-   $("#table td").click(handleBookClick);
+var setStudentButtons = function(mode){
+   console.log(mode);
+   switch(mode){
+      case "available":
+         $("#returnButton").css("display", "none");
+         $("#borrowButton").css("display", "block");
+         $("#borrowButton").prop("disabled", false);
+         break;
+      case "unavailable":
+         $("#returnButton").css("display", "none");
+         $("#borrowButton").css("display", "block");
+         $("#borrowButton").prop("disabled", true);
+         break;
+      case "borrowed":
+         $("#returnButton").css("display", "block");
+         $("#borrowButton").css("display", "none");
+         break;
+      case "unselected":
+         $("#returnButton").css("display", "none");
+         $("#borrowButton").css("display", "none");
+         break;
+      default:
+         console.log("error");
+   }
 }
 
-//generates the text boxes and button that are only displayed upon admin authentication, potentially need an anchor to insertBefore with
+//generates the text boxes and button that are only displayed upon librarian authentication
 var generateLibrarianFields = function(){
-      addTitle = $("<input id='titleBox' name='titleBox' placeholder='Book Name' type='text'/>");
-      addGenre = $("<input id='genreBox' name='genreBox' placeholder='Shelf' type='text'/>");
-      addButton = $("<input id='submitButton' name='submitButton' type='button' value='Add Book'/>");
+   librarianDiv = $("<div id='librarianDiv'></div>");
+   bookIdBox = $("<input id='bookIdBox' placeholder='Book ID' type='text'/>");
+   titleBox = $("<input id='titleBox' placeholder='Title' type='text'/>");
+   authorBox = $("<input id='authorBox' placeholder='Author' type='text'/>");
+   addBookButton = $("<input id='addBookButton' type='button' value='Add Book'/>");
 
-      addButton.click(function(){
-         var title = $('#titleBox').val(); 
-         var genre = $('#genreBox').val();
-         var shelfNum = l.getShelfNum(genre);
-         if(shelfNum != -1){
-            l.addBook(new Book(title, shelfNum));
-         } else {
-            alert(genre + " is not a valid Shelf.");
-         }
-         updateTable();
-         updateLocalStorage();
-      });
+   addBookButton.click(function(){
+      var id = $('#bookIdBox').val(); 
+      var title = $('#titleBox').val(); 
+      var author = $('#authorBox').val();
       
-      destination = $('body');
-      destination.append(addTitle);
-      destination.append(addGenre);
-      destination.append(addButton);
+      $.post("addBook.php", {id: id, title: title, author: author},
+         function(data,status){
+            refreshTable();
+         });
+   });
+   
+   librarianDiv.append(bookIdBox);
+   librarianDiv.append(titleBox);
+   librarianDiv.append(authorBox);
+   librarianDiv.append(addBookButton);
+   $('body').append(librarianDiv);
+}
+
+var generateStudentFields = function(){
+   studentDiv = $("<div id='studentDiv'></div>");
+   borrowButton = $("<input id='borrowButton'type='button' value='Borrow' />");
+   returnButton = $("<input id='returnButton' type='button' value='Return' />");
+   
+   borrowButton.click(function(){
+      $.post("borrowBook.php", {id: cellSelection.id},
+         function(data,status){
+            refreshTable();
+         });
+   });
+   
+   returnButton.click(function(){
+      var id = $('#bookIdBox').val(); 
+      var title = $('#titleBox').val(); 
+      var author = $('#authorBox').val();
+      
+      $.post("returnBook.php", {id: cellSelection.id},
+         function(data,status){
+            refreshTable();
+         });
+   });
+   studentDiv.append(borrowButton);
+   studentDiv.append(returnButton);
+   $('body').append(studentDiv);
 }

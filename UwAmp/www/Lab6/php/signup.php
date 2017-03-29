@@ -14,7 +14,7 @@
         
         <p><div id="phoneDiv">Phone: <input id="phone" type="text" pattern="" required></div></p>
         
-        <p><div id=libDiv">Librarian: <input id="librarian" type="checkbox" required></div></p>
+        <p><div id="libDiv">Librarian: <input id="librarian" type="checkbox" required></div></p>
         
         <p><div id="fnameDiv">First Name: <input id="firstName" type="text" pattern="[A-Za-z]" required></div></p>
         
@@ -28,7 +28,7 @@
            $("#connectButton").click(function(){
             //store isLib as 0 - false or 1-true
             var islib;
-            if($("#librarian").val()=='on'){islib=1;}
+            if($("#librarian").checked){islib=1;}
             else{islib=0;}
             var user = {userName: $("#username").val(), password: $("#password").val(), passConfirm: $("#passConfirm").val(), email: $("#email").val(),
             phone: $("#phone").val(), isLib: islib, fName: $("#firstName").val(), lName: $("#lastName").val()};

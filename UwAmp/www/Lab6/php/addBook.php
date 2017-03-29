@@ -32,27 +32,19 @@ class Book {
    public $id;
    public $shelf;
 
-   function __construct($title, $author) {
+   function __construct($id, $title, $author) {
       $this->title = $title;
       $this->author = $author;
-      $this->id = getUniqueID();
+      $this->id = $id;
       $this->shelf = findNonFullShelf();
    }
-}
-
-function getUniqueID(){
-   //TODO: make this gauruntee uniqueness
-   //do 
-   //generate random id
-   //while id exists in table
-   return mt_rand(10000, 999999999);
 }
 
 function findNonFullShelf(){
    return mt_rand(0, 3);//TODO: Make this ensure shelf is not full
 }
 
-$book = new Book($_REQUEST["title"], $_REQUEST["author"]);
+$book = new Book($_REQUEST["id"], $_REQUEST["title"], $_REQUEST["author"]);
 
 // --------------------------------------
 // ---     INSERT BOOK INTO BOOKS     ---

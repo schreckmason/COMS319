@@ -90,13 +90,14 @@ while($row = $result->fetch_assoc()) {
    $lib->addBook(new Book($row["BookTitle"], $row["Author"], $row["Availability"]==1), $row["ShelfId"], $row["BookId"]);
 }
 //Set borrowedBy for checked out books
-$sql = "SELECT booklocation.BookId, UserName, ShelfId ".
-       "FROM loanhistory, booklocation ".
+$sql = "SELECT booklocation.BookId, FirstName, LastName, ShelfId ".
+       "FROM loanhistory, booklocation, users ".
        "WHERE booklocation.BookId = loanhistory.BookId ".
+       "AND users.UserName = loanhistory.UserName ".
        "AND ReturnedDate IS NULL";
 $result = $conn->query($sql);
 while($row = $result->fetch_assoc()) {
-   $lib->shelves[$row["ShelfId"]]->books[$row["BookId"]]->borrowedBy = $row["UserName"];
+   $lib->shelves[$row["ShelfId"]]->books[$row["BookId"]]->borrowedBy = $row["FirstName"]." ".$row["LastName"];
 }
 // echo json_encode($lib);
 // --------------------------------------
@@ -130,24 +131,3 @@ for($i=0;$i<20;$i++){
 }
 echo "</table>";
 ?>
-<script>
-   var handleBookClick = function(){
-      var desc = this.textContent + " is written by " + this.getAttribute("author") +
-         " and is currently " + (this.getAttribute("availability")=="true"? "on the shelf": "checked out by " + this.getAttribute("borrowedBy")) + ".";
-      $('#bookDescription').text(desc);
-      selectTableCell(this);
-   }
-   
-   cellSelection = undefined;
-   var selectTableCell = function(tableCell){
-      if(cellSelection != undefined){
-         cellSelection.bgColor = cellSelection.getAttribute("availability")=="true"?'#FFFFFF':'#FF9999';
-      }
-      tableCell.bgColor = '#BBBBBFF';
-      cellSelection = tableCell;
-   }
-   
-   $(document).ready( function () {
-      $("#table td").filter(function(i, el){return el.textContent!="";}).click(handleBookClick);//set click handler for non-empty table cells
-   });
-</script>
