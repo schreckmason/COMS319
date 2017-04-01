@@ -18,8 +18,8 @@ $conn = new mysqli($dbServer, $username, $password, $dbName);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } else {
-  echo "Connected successfully\r\n";
-  echo $conn->host_info . "\r\n\r\n";
+  // echo "Connected successfully\r\n";
+  // echo $conn->host_info . "\r\n\r\n";
 }
 
 // --------------------------------------
@@ -41,7 +41,20 @@ class Book {
 }
 
 function findNonFullShelf(){
-   return mt_rand(0, 3);//TODO: Make this ensure shelf is not full
+   global $conn;
+   $nonFullShelves = array();
+   $sql = "SELECT count(*) AS BookCount, ShelfId FROM booklocation GROUP BY ShelfId";
+   $result = $conn->query($sql);
+   while($row = $result->fetch_assoc()) {
+      if($row["BookCount"]<20){
+         array_push($nonFullShelves, $row["ShelfId"]);
+      }
+   }
+   if(sizeof($nonFullShelves)!=0){
+      return $nonFullShelves[mt_rand(0, sizeof($nonFullShelves)-1)];
+   } else {
+      die("full");
+   }
 }
 
 $book = new Book($_REQUEST["id"], $_REQUEST["title"], $_REQUEST["author"]);
@@ -49,13 +62,13 @@ $book = new Book($_REQUEST["id"], $_REQUEST["title"], $_REQUEST["author"]);
 // --------------------------------------
 // ---     INSERT BOOK INTO BOOKS     ---
 // --------------------------------------
-$bookid=$book->id; 
-$booktit=$book->title;
-$bookauth=$book->author;
+// $bookid=$book->id; 
+// $booktit=$book->title;
+// $bookauth=$book->author;
 $sql = "INSERT INTO books (BookId, BookTitle, Author, Availability) VALUES (\"".$book->id."\", \"".$book->title."\", \"".$book->author."\", 1)";
 
 if ($conn->query($sql) === TRUE) {
-    echo "Book inserted into books successfully<br>";
+    echo "success";
 } else {
     die("Error: " . $sql . "<br>" . $conn->error);
 }
@@ -67,7 +80,7 @@ if ($conn->query($sql) === TRUE) {
 $sql = "INSERT INTO booklocation (BookId, ShelfId) VALUES (\"".$book->id."\", \"".$book->shelf."\")";
 
 if ($conn->query($sql) === TRUE) {
-    echo "Book inserted into booklocation successfully<br>";
+    echo "success";
 } else {
     die("Error: " . $sql . "<br>" . $conn->error);
 }

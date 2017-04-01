@@ -1,0 +1,18 @@
+Mason:
+Queries scripts for:
+   borrowBook.php,
+   returnBook.php,
+   deleteBook.php,
+   loanHistory.php,
+   updateLoanHistory.php
+Signup/Login Functionality
+Loan History UI
+
+Drake:
+Query Scripts for:
+   addBook.php,
+   getBooks.php
+Library Table UI (Cell Selection)
+Student Borrow/Return UI
+Handler code
+Various Tweaks

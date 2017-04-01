@@ -7,6 +7,36 @@ $dbName="lab06_test";
 $conn = new mysqli($dbServer, $username, $password, $dbName);
 
 
+class User {
+   public $userName; 
+   public $password;
+   public $email;
+   public $phone;
+   public $isLib;
+   public $fName;
+   public $lName;
+
+   function __construct($isLib, $userName, $password, $email, $phone, $fName, $lName) {
+      $this->title = $title;
+      $this->userName = $userName;
+      $this->password = $password;
+      $this->email = $email;
+      $this->phone = $phone;
+      $this->isLib = $isLib;
+      $this->fName = $fName;
+      $this->lName = $lName;
+   }
+}
+class Librarian {
+   function __construct($userName, $password, $email, $phone, $fName, $lName) {
+      parent::__construct(true, $userName, $password, $email, $phone, $fName, $lName);
+   }
+}
+class Student {
+   function __construct($userName, $password, $email, $phone, $fName, $lName) {
+      parent::__construct(false, $userName, $password, $email, $phone, $fName, $lName);
+   }
+}
 $user = $_REQUEST["userName"];//get username from post
 $password = $_REQUEST["password"];//get pw from post
 $passChk = $_REQUEST["passConfirm"];//get the pw confirm from post
@@ -17,8 +47,9 @@ $firstName = $_REQUEST["fName"];//get first name from post
 $lastName = $_REQUEST["lName"];//get last name from post
 
 $isValid = false;
-
-if($user!=null){
+$newUser = $_REQUEST["isLib"]==1?new Librarian($_REQUEST["userName"], $_REQUEST["password"], $_REQUEST["email"], $_REQUEST["phone"], $_REQUEST["fName"], $_REQUEST["lName"]):
+   new Student($_REQUEST["userName"], $_REQUEST["password"], $_REQUEST["email"], $_REQUEST["phone"], $_REQUEST["fName"], $_REQUEST["lName"]);
+if($newUser->userName!=null){
     //TODO: validation of posted values to make sure proper values are stored else echo "failure"
     //alphanumeric user
     if(!ctype_alnum($user)){ echo "User must contain only alpha-numeric characters."; return; }
@@ -33,7 +64,6 @@ if($user!=null){
     if(!ctype_alnum($perSplit[0]) || !ctype_alnum($perSplit[1])){ echo "Invalid address of email."; return; }
 
 
-    //For some reason 515-779-2243 is out of range, so we need to fix that
     if(strpos($phone, '-')!==false){
         $phoneArr=explode("-",$phone);//xxx-xxx-xxxx
         if(!ctype_digit($phoneArr[0]) || !ctype_digit($phoneArr[1]) || !ctype_digit($phoneArr[2])){ echo "Invalid phone number"; return; }

@@ -62,7 +62,6 @@ var selectTableCell = function(tableCell){
 }
 
 var setStudentButtons = function(mode){
-   console.log(mode);
    switch(mode){
       case "available":
          $("#returnButton").css("display", "none");
@@ -96,13 +95,13 @@ var generateLibrarianFields = function(){
    addBookButton = $("<input id='addBookButton' type='button' value='Add Book'/>");
    //delete button
    deleteBookButton = $("<input id='deleteBookButton' type='button' value='Delete Book'/>");
+   
    //view loanhistory of provided user
+   historyDiv = $("<div id='loanHistory'></div");
+   historyHeader = $("<h3>User Loan History</h3>");
    userBox = $("<p><input id = 'userNameBox' placeholder='User' type='text'/></p>");
    historyButton = $("<input id = 'historyButton' type='button' value='View History'/>");
-   
-   historyDiv = $("<div id='loanHistory'><br></div");
    historyHolder = $("<table id='historyTable' border='1'></table>");
-   
 
    addBookButton.click(function(){
       var id = $('#bookIdBox').val(); 
@@ -111,6 +110,9 @@ var generateLibrarianFields = function(){
       
       $.post("addBook.php", {id: id, title: title, author: author},
          function(data,status){
+            if(data=="full"){
+               alert("Library is full. New book not added.")
+            }
             refreshTable();
          });
    });
@@ -138,12 +140,16 @@ var generateLibrarianFields = function(){
    librarianDiv.append(authorBox);
    librarianDiv.append(addBookButton);
    librarianDiv.append(deleteBookButton);
-   librarianDiv.append(userBox);
-   librarianDiv.append(historyButton);
-   $('body').append(librarianDiv);
+   historyHeader
+   historyDiv.append(historyHeader);
+   historyDiv.append(userBox);
+   historyDiv.append(historyButton);
+   historyDiv.append($("<br><br>"));
    historyDiv.append(historyHolder);
    
-   $('body').append(historyDiv);
+   librarianDiv.append(historyDiv);
+   $('body').append(librarianDiv);
+   
 }
 
 var generateStudentFields = function(){
