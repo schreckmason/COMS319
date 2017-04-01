@@ -1,5 +1,4 @@
 <?php
-//Return json containing user loan history
 $user = $_REQUEST["user"];
 //connect to database
 $username="root";
