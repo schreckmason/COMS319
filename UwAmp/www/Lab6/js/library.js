@@ -52,10 +52,11 @@ var selectTableCell = function(tableCell){
       tableCell.bgColor = '#BBBBBFF';
       cellSelection = tableCell;
       mode = tableCell.getAttribute("availability")=="true"?"available":(tableCell.getAttribute("borrowedBy")==getUser()?"borrowed":"unavailable");
+      libMode = "selected";
    } else {
       // unselecting currently selected cell
       cellSelection = undefined;
-      mode = "unselected"
+      mode = "unselected";
    }
    setStudentButtons(mode);
 }
@@ -93,6 +94,15 @@ var generateLibrarianFields = function(){
    titleBox = $("<input id='titleBox' placeholder='Title' type='text'/>");
    authorBox = $("<input id='authorBox' placeholder='Author' type='text'/>");
    addBookButton = $("<input id='addBookButton' type='button' value='Add Book'/>");
+   //delete button
+   deleteBookButton = $("<input id='deleteBookButton' type='button' value='Delete Book'/>");
+   //view loanhistory of provided user
+   userBox = $("<p><input id = 'userNameBox' placeholder='User' type='text'/></p>");
+   historyButton = $("<input id = 'historyButton' type='button' value='View History'/>");
+   
+   historyDiv = $("<div id='loanHistory'><br></div");
+   historyHolder = $("<table id='historyTable' border='1'></table>");
+   
 
    addBookButton.click(function(){
       var id = $('#bookIdBox').val(); 
@@ -105,11 +115,35 @@ var generateLibrarianFields = function(){
          });
    });
    
+   deleteBookButton.click(function(){
+      if(cellSelection===undefined){alert("Please select a book from the table you wish to remove."); return;}
+      $.post("../php/deleteBook.php", {id: cellSelection.id},
+             function(response){
+               console.log(response);
+               refreshTable();
+             });
+   });
+   
+   historyButton.click(function(){
+         $.post("../php/getLoanHistory.php",{user: $('#userNameBox').val()},
+                function(response){
+                  $('#historyTable').html(response);
+                  //historyDiv.html(response);
+                  console.log(response);
+                });
+   });
+   
    librarianDiv.append(bookIdBox);
    librarianDiv.append(titleBox);
    librarianDiv.append(authorBox);
    librarianDiv.append(addBookButton);
+   librarianDiv.append(deleteBookButton);
+   librarianDiv.append(userBox);
+   librarianDiv.append(historyButton);
    $('body').append(librarianDiv);
+   historyDiv.append(historyHolder);
+   
+   $('body').append(historyDiv);
 }
 
 var generateStudentFields = function(){
@@ -118,10 +152,14 @@ var generateStudentFields = function(){
    returnButton = $("<input id='returnButton' type='button' value='Return' />");
    
    borrowButton.click(function(){
-      $.post("borrowBook.php", {id: cellSelection.id},
+      $.post("../php/borrowBook.php", {id: cellSelection.id},
          function(data,status){
             refreshTable();
          });
+      $.post("../php/updateLoanHistory.php", {id: cellSelection.id, user: localStorage.getItem("user")},
+             function(response){
+               console.log(response);
+             });
    });
    
    returnButton.click(function(){
@@ -129,7 +167,7 @@ var generateStudentFields = function(){
       var title = $('#titleBox').val(); 
       var author = $('#authorBox').val();
       
-      $.post("returnBook.php", {id: cellSelection.id},
+      $.post("../php/returnBook.php", {id: cellSelection.id},
          function(data,status){
             refreshTable();
          });

@@ -24,7 +24,7 @@
                 var credentials={username: username, password: $("#inputPass").val()};
                 $.post("./validateLogin.php",credentials,
                        function(response,status){
-                        //$("#statusDiv").html(response);//make the result viewable for now, when it is working have it redirect to new page for library
+                        //$("#statusDiv").html(response);//make the result viewable for now, when it is working have it redirect to new page for lib
                         if(response==="Librarian" || response==="Student"){
                            localStorage.setItem("userType", response);
                            localStorage.setItem("user", username);

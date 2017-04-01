@@ -25,16 +25,23 @@
     <div id="statusDiv"></div>
     <script>
         $(document).ready(function(){
+                       //store isLib as 0 - false or 1-true
+            //if($("#librarian").checked){islib=1;}
+            //else{islib=0;}
+
            $("#connectButton").click(function(){
-            //store isLib as 0 - false or 1-true
             var islib;
-            if($("#librarian").checked){islib=1;}
-            else{islib=0;}
+            if($("#librarian").is(':checked')){islib=1;}
+            else{islib=0;
+            }
             var user = {userName: $("#username").val(), password: $("#password").val(), passConfirm: $("#passConfirm").val(), email: $("#email").val(),
             phone: $("#phone").val(), isLib: islib, fName: $("#firstName").val(), lName: $("#lastName").val()};
                 $.post("./register.php",user,
                        function(response, status){
                         $('#statusDiv').html(response);//TODO: Redirect to login?
+                        if(response=="success"){
+                            window.location.href = './login.php';
+                        }
                        });
                 
            });

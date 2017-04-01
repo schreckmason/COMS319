@@ -90,14 +90,14 @@ while($row = $result->fetch_assoc()) {
    $lib->addBook(new Book($row["BookTitle"], $row["Author"], $row["Availability"]==1), $row["ShelfId"], $row["BookId"]);
 }
 //Set borrowedBy for checked out books
-$sql = "SELECT booklocation.BookId, FirstName, LastName, ShelfId ".
+$sql = "SELECT booklocation.BookId, users.UserName, FirstName, LastName, ShelfId ".
        "FROM loanhistory, booklocation, users ".
        "WHERE booklocation.BookId = loanhistory.BookId ".
        "AND users.UserName = loanhistory.UserName ".
        "AND ReturnedDate IS NULL";
 $result = $conn->query($sql);
 while($row = $result->fetch_assoc()) {
-   $lib->shelves[$row["ShelfId"]]->books[$row["BookId"]]->borrowedBy = $row["FirstName"]." ".$row["LastName"];
+   $lib->shelves[$row["ShelfId"]]->books[$row["BookId"]]->borrowedBy =$row["UserName"];
 }
 // echo json_encode($lib);
 // --------------------------------------

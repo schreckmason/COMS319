@@ -56,7 +56,8 @@ if($isValid){
     $sql = "INSERT INTO users (UserName, Password, Email, Phone, Librarian, FirstName, LastName)
     VALUES ('$user', '$encryptedPass', '$email', '$phone', '$isLib', '$firstName', '$lastName')";
     if($conn->query($sql)===TRUE){
-        echo "Created successfully";
+        //echo "Created successfully";
+        echo "success";
     }else{
         echo "ERROR: ".$sql."<br>".$conn->error;
     }

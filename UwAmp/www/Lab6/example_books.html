@@ -702,7 +702,7 @@
          var ascii = /^[ -~]+$/;
          if(title.length > 0 && author.length > 0 && ascii.test(title + author)) {
             // title and author nonempty ascii-only strings
-            var book = {id: Math.floor((Math.random() * 999989999) + 10000);, title: title, author: author};
+            var book = {id: Math.floor((Math.random() * 999989999) + 10000), title: title, author: author};
             $.post("php/addBook.php", book,
                function(data,status){
                   console.log(data,status);

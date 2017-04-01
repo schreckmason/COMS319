@@ -18,8 +18,8 @@ $conn = new mysqli($dbServer, $username, $password, $dbName);
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } else {
-  echo "Connected successfully<br>";
-  echo $conn->host_info . "<br><br>";
+  echo "Connected successfully\r\n";
+  echo $conn->host_info . "\r\n\r\n";
 }
 
 // --------------------------------------
@@ -49,7 +49,9 @@ $book = new Book($_REQUEST["id"], $_REQUEST["title"], $_REQUEST["author"]);
 // --------------------------------------
 // ---     INSERT BOOK INTO BOOKS     ---
 // --------------------------------------
-
+$bookid=$book->id; 
+$booktit=$book->title;
+$bookauth=$book->author;
 $sql = "INSERT INTO books (BookId, BookTitle, Author, Availability) VALUES (\"".$book->id."\", \"".$book->title."\", \"".$book->author."\", 1)";
 
 if ($conn->query($sql) === TRUE) {
