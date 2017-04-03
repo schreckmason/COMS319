@@ -16,9 +16,20 @@
     
     //We can change this to be our player image later
     var ball;
-    //var leftBtn;
-    //var rightBtn;
     var speed = 4;
+    var paddle;
+    //Handle creation of brick objects
+    var bricks;
+    var newBrick;
+    var brickInfo;
+    //Score text
+    var scoreText;
+    var score = 0;
+    //Add Player Lives
+    var lives = 3;
+    var heart1;
+    var heart2;
+    var heart3;
     
     //preloads page assets
     function preload() {
@@ -29,43 +40,148 @@
         game.stage.backgroundColor = '#eee';
         
         
-        //load the sprite of our game object this will be changed to make a better game project
-        game.load.image('ball', 'img/testball.png');
+        game.load.image('ball', 'img/testball.png');//load the sprite of our game object this will be changed to make a better game project
+        game.load.image('paddle','img/testpaddle.png');//load the paddle, this should once again change to something cooler
+        game.load.image('brick', 'img/testbrick.png');
+        game.load.image('heart', 'img/heart.png');
     }
     
     //executed once all assets are lodaed and ready
     function create() {
-        game.physics.startSystem(Phaser.Physics.Arcade);
-        //Set the ball as the player and init sprite
-        ball = game.add.sprite(50,50, 'ball');
-        ball.anchor.setTo(0.5, 0.5);
-        //Make camera follow the ball for it to navigate
-        game.camera.follow(ball);
-        
-        
-        game.physics.enable(ball, Phaser.Physics.ARCADE);
-        ball.body.collideWorldBounds = true;//make our object able to collide with the edge of the 'world'
-        ball.body.bounce.set(1);//allow the ball to bounce
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+    ball = game.add.sprite(game.world.width*0.5, game.world.height-25, 'ball');
+    ball.anchor.set(0.5);
+    game.physics.enable(ball, Phaser.Physics.ARCADE);
+    ball.body.velocity.set(150, -150);
+    ball.body.collideWorldBounds = true;
+    ball.body.bounce.set(1);
+
+    paddle = game.add.sprite(game.world.width*0.5, game.world.height-5, 'paddle');
+    paddle.anchor.set(0.5,1);
+    game.physics.enable(paddle, Phaser.Physics.ARCADE);
+    paddle.body.collideWorldBounds = true;
+    paddle.body.immovable = true;
+    initBricks();
+    
+    //Game Over Logic
+    ball.events.onOutOfBounds.add(ballLeaveScreen, this);
+    game.physics.arcade.checkCollision.down = false;
+    ball.checkWorldBounds = true;
+    //ball.events.onOutOfBounds.add(function(){
+    //    alert('GAME OVER');
+    //    location.reload();
+    //}, this);
+    //Game Score
+    scoreText = game.add.text(5,5, 'Points: 0',{font: '18px Arial', FILLD: '#0095DD'});
+    //Life Alert
+    heart1 = game.add.sprite(game.world.width-200,0,'heart');
+    heart2 = game.add.sprite(game.world.width-200,160, 'heart');
+    heart3 = game.add.sprite(game.world.width-200, 320, 'heart');
+    game.world.sendToBack(heart1);
+    game.world.sendToBack(heart2);
+    game.world.sendToBack(heart3);
+    heart1.immovable = true;
+    heart2.immovable = true;
+    heart3.immovable = true;
     }
     //executed on every frame
     function update() {
+        game.physics.arcade.collide(ball, paddle, ballHitPaddle);
+        game.physics.arcade.collide(ball,bricks,ballHitBrick);
+        //paddle.x = game.input.x || game.world.width*0.5;
         //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
         if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
-            ball.x -= speed;
-            ball.angle = -15;//will only matter for aimation of detailed objects
+            //ball.x -= speed;
+            paddle.x -=speed;
+        //    ball.angle = -15;//will only matter for aimation of detailed objects
         }else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
-            ball.x += speed;
-            ball.angle = 15;//will only matter for detailed objects
-        }else if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
-            ball.y += speed;
-            //ball.angle = 15;//will only matter for detailed objects
-        }else if(game.input.keyboard.isDown(Phaser.Keyboard.UP)){
-            ball.y -= speed;
+            paddle.x += speed;
         }else{
-            ball.rotation = 0;
+            
         }
     }
 
+    //Change this to take in parameters to construct various brick fields
+    function initBricks(){
+        brickInfo = {
+            width: 50,
+            height: 20,
+            count: {
+                row: 7,
+                col: 3
+            },
+            offset: {
+                top: 50,
+                left: 60
+            },
+            padding: 10
+        };
+        bricks = game.add.group();
+        for(col=0;col<brickInfo.count.col; col++){
+            for(row=0; row<brickInfo.count.row; row++){
+                var brickX = (row*(brickInfo.width+brickInfo.padding))+brickInfo.offset.left;
+                var brickY = (col*(brickInfo.height+brickInfo.padding))+brickInfo.offset.top;
+                newBrick = game.add.sprite(brickX, brickY, 'brick');
+                game.physics.enable(newBrick, Phaser.Physics.ARCADE);
+                newBrick.body.immovable = true;
+                newBrick.anchor.set(0.5);
+                bricks.add(newBrick);
+            }
+        }
+    }
+    //Called on every collision between the ball and the paddle
+    function ballHitPaddle(ball, paddle){
+        ball.body.velocity.x = -1*5*(paddle.x-ball.x);
+    }
+    //Called on every collision between the ball and the brick
+    function ballHitBrick(ball, brick){
+        //brick.kill();
+        var killTween = game.add.tween(brick.scale);
+        killTween.to({x:0,y:0}, 200, Phaser.Easing.Linear.None);
+        killTween.onComplete.addOnce(function(){
+            brick.kill();
+        },this);
+        killTween.start();
+        score += 1;
+        scoreText.setText('Points: '+score);
+        
+        var count_alive = 0;
+        for(i=0;i<bricks.children.length; i++){
+            if(bricks.children[i].alive === true){
+                count_alive++;
+            }
+        }
+        if(count_alive === 0){
+            alert('You won!');
+            location.reload();//replace me with level increase
+        }
+    }
+    //End Game LOGIC
+    function ballLeaveScreen(){
+        lives--;
+        switch(lives){
+            case 2:
+                heart3.kill();
+                ball.reset(game.world.width*0.5, game.world.height-25);
+                paddle.reset(game.world.width*0.5, game.world.height-5);
+                game.input.onDown.addOnce(function(){
+                    ball.body.velocity.set(150,-150);
+                },this);
+                break;
+            case 1:
+                heart2.kill();
+                ball.reset(game.world.width*0.5, game.world.height-25);
+                paddle.reset(game.world.width*0.5, game.world.height-5);
+                game.input.onDown.addOnce(function(){
+                    ball.body.velocity.set(150,-150);
+                },this);
+                break;
+            case 0:
+                heart1.kill();
+                alert('GAME OVER SCRUB');
+                location.reload();
+        }
+    }
 </script>
 </body>
 </html>
