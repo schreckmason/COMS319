@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Dope Ass Game</title>
+    <style>* { padding: 0; margin: 0; }</style>
+    <script src="js/phaser.min.js"></script>
+</head>
+<body>
+<script>
+    //This auto initializes the canvas element
+    //Parameters: width, height, rendering method (AUTO usually defaults to WebGL, falls back to Canvas 2D), id of the canvas
+    var game = new Phaser.Game(800, 580, Phaser.AUTO, null,{
+      preload: preload, create: create, update: update
+    });
+    
+    //We can change this to be our player image later
+    var ball;
+    //var leftBtn;
+    //var rightBtn;
+    var speed = 4;
+    
+    //preloads page assets
+    function preload() {
+        //Scale the canvas to any screen size
+        game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
+        game.stage.backgroundColor = '#eee';
+        
+        
+        //load the sprite of our game object this will be changed to make a better game project
+        game.load.image('ball', 'img/testball.png');
+    }
+    
+    //executed once all assets are lodaed and ready
+    function create() {
+        game.physics.startSystem(Phaser.Physics.Arcade);
+        //Set the ball as the player and init sprite
+        ball = game.add.sprite(50,50, 'ball');
+        ball.anchor.setTo(0.5, 0.5);
+        //Make camera follow the ball for it to navigate
+        game.camera.follow(ball);
+        
+        
+        game.physics.enable(ball, Phaser.Physics.ARCADE);
+        ball.body.collideWorldBounds = true;//make our object able to collide with the edge of the 'world'
+        ball.body.bounce.set(1);//allow the ball to bounce
+    }
+    //executed on every frame
+    function update() {
+        //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
+        if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+            ball.x -= speed;
+            ball.angle = -15;//will only matter for aimation of detailed objects
+        }else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+            ball.x += speed;
+            ball.angle = 15;//will only matter for detailed objects
+        }else if(game.input.keyboard.isDown(Phaser.Keyboard.DOWN)){
+            ball.y += speed;
+            //ball.angle = 15;//will only matter for detailed objects
+        }else if(game.input.keyboard.isDown(Phaser.Keyboard.UP)){
+            ball.y -= speed;
+        }else{
+            ball.rotation = 0;
+        }
+    }
+
+</script>
+</body>
+</html>
