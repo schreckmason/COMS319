@@ -8,28 +8,30 @@
       "vAlign": {"offset": 50},
       "hAlign": {"offset": 0, "anchor":"center"},
       "padding":10,
-      "type": "standard"
+      "type": "standard",
+      "finalLevel": false
    },
    "levels":
    [
       {"points": 4, "blockGroups":[{"cols": 4, "rows": 1}]},
       
       {"points": 8, "blockGroups":[
-       {"cols": 2, "rows": 2, "hAlign": {"offset": 100, "anchor":"left"}},
-       {"cols": 2, "rows": 2, "hAlign": {"offset": -100, "anchor":"right"}}]},
+         {"cols": 2, "rows": 2, "hAlign": {"offset": 100, "anchor":"left"}},
+         {"cols": 2, "rows": 2, "hAlign": {"offset": -100, "anchor":"right"}}]},
                                    
       {"points": 18, "blockGroups":[
-       {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 50}},
-       {"cols": 3, "rows": 1, "hAlign": {"offset": 190, "anchor":"left"}, "vAlign": {"offset": 80}},
-       {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 110}},
-       {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 50}},
-       {"cols": 3, "rows": 1, "hAlign": {"offset": -190, "anchor":"right"}, "vAlign": {"offset": 80}},
-       {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 110}}]},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 50}},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": 190, "anchor":"left"}, "vAlign": {"offset": 80}},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 110}},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 50}},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": -190, "anchor":"right"}, "vAlign": {"offset": 80}},
+         {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 110}}]},
       
       {"points": 28, "blockGroups":[{"cols": 7, "rows": 4}]},
       
       {"points": 40, "blockGroups":[{"cols": 10, "rows": 4}]},
       
-      {"points": 10, "blockGroups":[{"cols": 5, "rows": 2, "type": "move1"}]}
+      {"points": 10, "finalLevel": true, "blockGroups":[
+         {"cols": 5, "rows": 2, "type": "move1"}]}
    ]
 }

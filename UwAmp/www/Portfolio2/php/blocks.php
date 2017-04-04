@@ -34,7 +34,8 @@
     var heart2;
     var heart3;
     //game level implementation
-    var level=5;
+    var level=1;
+    var finalLevel = false;
     var lvlPass=0;
     var lvlScore=0;
     
@@ -96,6 +97,7 @@
            console.log(response);
            var levelInfo = JSON.parse(response);
            var blockGroups = levelInfo.blockGroups;
+           finalLevel = levelInfo.finalLevel;//boolean (Is this the final level?)
            lvlPass = levelInfo.points;
            bricks = game.add.group();
            blockGroups.forEach(function(blockGroup) {
@@ -169,7 +171,12 @@
         
         if(lvlScore == lvlPass){
             // all bricks cleared
-            alert('Level '+level+' clear!');
+            levelCleared();
+        }
+    }
+     function levelCleared(){
+         alert('Level '+level+' clear!');
+         if(!finalLevel){
             level++;
             lvlScore = 0;//re init lvlScore for next level
             lvlPass = 0;//re init lvlPass
@@ -180,9 +187,9 @@
             game.input.onDown.addOnce(function(){
                 ball.body.velocity.set(150,-150);
             },this);
-        }
-    }
-    
+         }
+     }
+     
     //End Game LOGIC
     function ballLeaveScreen(){
         lives--;
