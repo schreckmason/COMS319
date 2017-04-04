@@ -1,0 +1,8 @@
+{defaults:{width: 50, height: 20, count:{row: 1, col: 1}, offset:{top: 50, left: "center"}, padding:10},
+levels:[
+{[{2, 1}]},
+{},
+{},
+{},
+{},
+{}]}
