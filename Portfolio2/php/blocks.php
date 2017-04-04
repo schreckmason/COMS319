@@ -8,6 +8,7 @@
 </head>
 <body>
 <script>
+    /*--------------------------------------------------------  GAME SETUP  ------------------------------------------------------*/
     //This auto initializes the canvas element
     //Parameters: width, height, rendering method (AUTO usually defaults to WebGL, falls back to Canvas 2D), id of the canvas
     var game = new Phaser.Game(800, 580, Phaser.AUTO, null,{
@@ -52,53 +53,40 @@
     
     //executed once all assets are lodaed and ready
     function create() {
-    game.physics.startSystem(Phaser.Physics.ARCADE);
-    ball = game.add.sprite(game.world.width*0.5, game.world.height-25, 'ball');
-    ball.anchor.set(0.5);
-    game.physics.enable(ball, Phaser.Physics.ARCADE);
-    ball.body.velocity.set(150, -150);
-    ball.body.collideWorldBounds = true;
-    ball.body.bounce.set(1);
+       game.physics.startSystem(Phaser.Physics.ARCADE);
+       ball = game.add.sprite(game.world.width*0.5, game.world.height-25, 'ball');
+       ball.anchor.set(0.5);
+       game.physics.enable(ball, Phaser.Physics.ARCADE);
+       ball.body.velocity.set(150, -150);
+       ball.body.collideWorldBounds = true;
+       ball.body.bounce.set(1);
 
-    paddle = game.add.sprite(game.world.width*0.5, game.world.height-5, 'paddle');
-    paddle.anchor.set(0.5,1);
-    game.physics.enable(paddle, Phaser.Physics.ARCADE);
-    paddle.body.collideWorldBounds = true;
-    paddle.body.immovable = true;
-    initBricks(level);
+       paddle = game.add.sprite(game.world.width*0.5, game.world.height-5, 'paddle');
+       paddle.anchor.set(0.5,1);
+       game.physics.enable(paddle, Phaser.Physics.ARCADE);
+       paddle.body.collideWorldBounds = true;
+       paddle.body.immovable = true;
+       initBricks(level);
+       
+       //Game Over Logic
+       ball.events.onOutOfBounds.add(ballLeaveScreen, this);
+       game.physics.arcade.checkCollision.down = false;
+       ball.checkWorldBounds = true;
+       //Game Score
+       scoreText = game.add.text(5,5, 'Points: 0',{font: '18px Arial', FILLD: '#0095DD'});
+       //Life Alert
+       heart1 = game.add.sprite(game.world.width-200,0,'heart');
+       heart2 = game.add.sprite(game.world.width-200,160, 'heart');
+       heart3 = game.add.sprite(game.world.width-200, 320, 'heart');
+       game.world.sendToBack(heart1);
+       game.world.sendToBack(heart2);
+       game.world.sendToBack(heart3);
+       heart1.immovable = true;
+       heart2.immovable = true;
+       heart3.immovable = true;
+    }
     
-    //Game Over Logic
-    ball.events.onOutOfBounds.add(ballLeaveScreen, this);
-    game.physics.arcade.checkCollision.down = false;
-    ball.checkWorldBounds = true;
-    //Game Score
-    scoreText = game.add.text(5,5, 'Points: 0',{font: '18px Arial', FILLD: '#0095DD'});
-    //Life Alert
-    heart1 = game.add.sprite(game.world.width-200,0,'heart');
-    heart2 = game.add.sprite(game.world.width-200,160, 'heart');
-    heart3 = game.add.sprite(game.world.width-200, 320, 'heart');
-    game.world.sendToBack(heart1);
-    game.world.sendToBack(heart2);
-    game.world.sendToBack(heart3);
-    heart1.immovable = true;
-    heart2.immovable = true;
-    heart3.immovable = true;
-    }
-    //executed on every frame
-    function update() {
-        game.physics.arcade.collide(ball, paddle, ballHitPaddle);
-        game.physics.arcade.collide(ball,bricks, ballHitBrick);
-        //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
-        if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
-            //ball.x -= speed;
-            paddle.x -=speed;
-        //    ball.angle = -15;//will only matter for aimation of detailed objects
-        }else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
-            paddle.x += speed;
-        }else{
-            
-        }
-    }
+    /*--------------------------------------------------------  LEVEL INITIALIZATION  ------------------------------------------------------*/
 
     //Change this to take in parameters to construct various brick fields
     function initBricks(lvl){
@@ -143,11 +131,11 @@
             },
             padding: 10
         };
-        changeBlockLoc(brickInfo.count.row, brickInfo.count.col, brickInfo.width, brickInfo.height,brickInfo.offset.top,brickInfo.offset.left,brickInfo.padding,level);
+        placeBlocks(brickInfo.count.row, brickInfo.count.col, brickInfo.width, brickInfo.height,brickInfo.offset.top,brickInfo.offset.left,brickInfo.padding,level);
         lvlPass = brickInfo.count.row*brickInfo.count.col;
     }
     //Necessary, once bricks array hits a certain size the anchor location needs to change, plus will allow for movement to be incoporated
-    function changeBlockLoc(row,col,width,height,otop,oleft,padding,lvl){
+    function placeBlocks(row,col,width,height,otop,oleft,padding,lvl){
         bricks = game.add.group();
         for(c=0;c<col; c++){
             for(r=0; r<row; r++){
@@ -174,12 +162,29 @@
                         newBrick.anchor.set(0.5);
                         moveBrix(newBrick);
                         break;
-                    default:
-                        newBrick.anchor.set(0.5);
+                    default:     newBrick.anchor.set(0.5);
                         break;
                 }
                 bricks.add(newBrick);
             }
+        }
+    }
+    
+    /*--------------------------------------------------------  MOVEMENT HANDLERS  ------------------------------------------------------*/
+    
+    //executed on every frame
+    function update() {
+        game.physics.arcade.collide(ball, paddle, ballHitPaddle);
+        game.physics.arcade.collide(ball,bricks, ballHitBrick);
+        //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
+        if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
+            //ball.x -= speed;
+            paddle.x -=speed;
+        //    ball.angle = -15;//will only matter for aimation of detailed objects
+        }else if(game.input.keyboard.isDown(Phaser.Keyboard.RIGHT)){
+            paddle.x += speed;
+        }else{
+            
         }
     }
     //bick movement
@@ -188,6 +193,8 @@
         obj.body.collideWorldBounds=true;
         obj.body.bounce.set(1);
     }
+    
+    /*--------------------------------------------------------  COLLISION HANDLERS  ------------------------------------------------------*/
     //Called on every collision between the ball and the paddle
     function ballHitPaddle(ball, paddle){
         ball.body.velocity.x = -1*5*(paddle.x-ball.x);
@@ -200,9 +207,9 @@
         score += 1;
         lvlScore+=1;
         scoreText.setText('Points: '+score);
-        console.log(lvlPass);
-        console.log(lvlScore);      
+        
         if(lvlScore == lvlPass){
+            // all bricks cleared
             alert('Level '+level+' clear!');
             level++;
             lvlScore = 0;//re init lvlScore for next level
@@ -216,6 +223,7 @@
             },this);
         }
     }
+    
     //End Game LOGIC
     function ballLeaveScreen(){
         lives--;
@@ -243,6 +251,8 @@
                 location.reload();
         }
     }
+    
+    //animate fade out for a given sprite (object)
     function scaleKillSprite(obj){
         var killTween = game.add.tween(obj.scale);
         killTween.to({x:game.world.width*0.5,y:game.world.heigh*0.5}, 200, Phaser.Easing.Linear.None);
