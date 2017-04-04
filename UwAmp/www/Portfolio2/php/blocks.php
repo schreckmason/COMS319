@@ -32,7 +32,7 @@
     var heart2;
     var heart3;
     //game level implementation
-    var level=5;
+    var level=0;
     var lvlPass=0;
     var lvlScore=0;
     
@@ -45,8 +45,9 @@
         game.stage.backgroundColor = '#eee';
         
         
-        game.load.image('ball', '../img/testball.png');//load the sprite of our game object this will be changed to make a better game project
-        game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
+        game.load.image('ball', '../img/newBall.png');//load the sprite of our game object this will be changed to make a better game project
+        //game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
+        game.load.image('paddle','../img/newBar.png');
         game.load.image('brick', '../img/testbrick.png');
         game.load.image('heart', '../img/heart.png');
     }
