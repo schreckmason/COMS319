@@ -34,7 +34,7 @@
     var heart2;
     var heart3;
     //game level implementation
-    var level=2;
+    var level=5;
     var lvlPass=0;
     var lvlScore=0;
     
@@ -123,9 +123,9 @@
                 //Set special brick properties
                 switch(groupDetails.type){
                     case "move1":
-                        obj.body.velocity.set(200,0);
-                        obj.body.collideWorldBounds=true;
-                        obj.body.bounce.set(1);
+                        newBrick.body.velocity.set(200,0);
+                        newBrick.body.collideWorldBounds=true;
+                        newBrick.body.bounce.set(1);
                         break;
                     default:
                         break;
@@ -151,9 +151,6 @@
         }else{
             
         }
-    }
-    //bick movement
-    function moveBrix(obj){
     }
     
     /*--------------------------------------------------------  COLLISION HANDLERS  ------------------------------------------------------*/
