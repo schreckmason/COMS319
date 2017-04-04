@@ -30,6 +30,10 @@
     var heart1;
     var heart2;
     var heart3;
+    //game level implementation
+    var level=0;
+    var lvlPass=0;
+    var lvlScore=0;
     
     //preloads page assets
     function preload() {
@@ -61,16 +65,12 @@
     game.physics.enable(paddle, Phaser.Physics.ARCADE);
     paddle.body.collideWorldBounds = true;
     paddle.body.immovable = true;
-    initBricks();
+    initBricks(level);
     
     //Game Over Logic
     ball.events.onOutOfBounds.add(ballLeaveScreen, this);
     game.physics.arcade.checkCollision.down = false;
     ball.checkWorldBounds = true;
-    //ball.events.onOutOfBounds.add(function(){
-    //    alert('GAME OVER');
-    //    location.reload();
-    //}, this);
     //Game Score
     scoreText = game.add.text(5,5, 'Points: 0',{font: '18px Arial', FILLD: '#0095DD'});
     //Life Alert
@@ -87,8 +87,7 @@
     //executed on every frame
     function update() {
         game.physics.arcade.collide(ball, paddle, ballHitPaddle);
-        game.physics.arcade.collide(ball,bricks,ballHitBrick);
-        //paddle.x = game.input.x || game.world.width*0.5;
+        game.physics.arcade.collide(ball,bricks, ballHitBrick);
         //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
         if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
             //ball.x -= speed;
@@ -102,13 +101,41 @@
     }
 
     //Change this to take in parameters to construct various brick fields
-    function initBricks(){
+    function initBricks(lvl){
+        var lvlRow;
+        var lvlCol;
+        switch(lvl){
+            case 0:
+                lvlRow = 2;
+                lvlCol = 1;
+                break;
+            case 1:
+                lvlRow = 4;
+                lvlCol = 2;
+                break;
+            case 2:
+                lvlRow = 3;
+                lvlCol = 1;
+                break;
+            case 3:
+                lvlRow = 6;
+                lvlCol = 3;
+                break;
+            case 4:
+                lvlRow = 10;
+                lvlCol = 4;
+                break;
+            case 5:
+                //movement
+                lvlRow = 5;
+                lvlCol = 2;
+        }
         brickInfo = {
             width: 50,
             height: 20,
             count: {
-                row: 7,
-                col: 3
+                row: lvlRow,
+                col: lvlCol
             },
             offset: {
                 top: 50,
@@ -116,44 +143,77 @@
             },
             padding: 10
         };
+        changeBlockLoc(brickInfo.count.row, brickInfo.count.col, brickInfo.width, brickInfo.height,brickInfo.offset.top,brickInfo.offset.left,brickInfo.padding,level);
+        lvlPass = brickInfo.count.row*brickInfo.count.col;
+    }
+    //Necessary, once bricks array hits a certain size the anchor location needs to change, plus will allow for movement to be incoporated
+    function changeBlockLoc(row,col,width,height,otop,oleft,padding,lvl){
         bricks = game.add.group();
-        for(col=0;col<brickInfo.count.col; col++){
-            for(row=0; row<brickInfo.count.row; row++){
-                var brickX = (row*(brickInfo.width+brickInfo.padding))+brickInfo.offset.left;
-                var brickY = (col*(brickInfo.height+brickInfo.padding))+brickInfo.offset.top;
+        for(c=0;c<col; c++){
+            for(r=0; r<row; r++){
+                var brickX = (r*(brickInfo.width+brickInfo.padding))+brickInfo.offset.left;
+                var brickY = (c*(brickInfo.height+brickInfo.padding))+brickInfo.offset.top;
                 newBrick = game.add.sprite(brickX, brickY, 'brick');
                 game.physics.enable(newBrick, Phaser.Physics.ARCADE);
                 newBrick.body.immovable = true;
-                newBrick.anchor.set(0.5);
+                switch(lvl){
+                    case 0:
+                        newBrick.anchor.set(-6);
+                        break;
+                    case 1:
+                    case 2:
+                        newBrick.anchor.set(-5);
+                        break;
+                    case 3:
+                        newBrick.anchor.set(-4);
+                        break;
+                    case 4:
+                        newBrick.anchor.set(0.5);
+                        break;
+                    case 5:
+                        newBrick.anchor.set(0.5);
+                        moveBrix(newBrick);
+                        break;
+                    default:
+                        newBrick.anchor.set(0.5);
+                        break;
+                }
                 bricks.add(newBrick);
             }
         }
+    }
+    //bick movement
+    function moveBrix(obj){
+        obj.body.velocity.set(200,0);
+        obj.body.collideWorldBounds=true;
+        obj.body.bounce.set(1);
     }
     //Called on every collision between the ball and the paddle
     function ballHitPaddle(ball, paddle){
         ball.body.velocity.x = -1*5*(paddle.x-ball.x);
     }
+    
     //Called on every collision between the ball and the brick
     function ballHitBrick(ball, brick){
-        //brick.kill();
-        var killTween = game.add.tween(brick.scale);
-        killTween.to({x:0,y:0}, 200, Phaser.Easing.Linear.None);
-        killTween.onComplete.addOnce(function(){
-            brick.kill();
-        },this);
-        killTween.start();
-        score += 1;
-        scoreText.setText('Points: '+score);
+        scaleKillSprite(brick);
         
-        var count_alive = 0;
-        for(i=0;i<bricks.children.length; i++){
-            if(bricks.children[i].alive === true){
-                count_alive++;
-            }
-        }
-        if(count_alive === 0){
-            alert('You won!');
-            location.reload();//replace me with level increase
+        score += 1;
+        lvlScore+=1;
+        scoreText.setText('Points: '+score);
+        console.log(lvlPass);
+        console.log(lvlScore);      
+        if(lvlScore == lvlPass){
+            alert('Level '+level+' clear!');
+            level++;
+            lvlScore = 0;//re init lvlScore for next level
+            lvlPass = 0;//re init lvlPass
+            bricks = null;
+            initBricks(level);
+            ball.reset(game.world.width*0.5, game.world.height-25);
+            paddle.reset(game.world.width*0.5, game.world.height-5);
+            game.input.onDown.addOnce(function(){
+                ball.body.velocity.set(150,-150);
+            },this);
         }
     }
     //End Game LOGIC
@@ -161,7 +221,7 @@
         lives--;
         switch(lives){
             case 2:
-                heart3.kill();
+                scaleKillSprite(heart3);
                 ball.reset(game.world.width*0.5, game.world.height-25);
                 paddle.reset(game.world.width*0.5, game.world.height-5);
                 game.input.onDown.addOnce(function(){
@@ -169,7 +229,7 @@
                 },this);
                 break;
             case 1:
-                heart2.kill();
+                scaleKillSprite(heart2);
                 ball.reset(game.world.width*0.5, game.world.height-25);
                 paddle.reset(game.world.width*0.5, game.world.height-5);
                 game.input.onDown.addOnce(function(){
@@ -177,10 +237,19 @@
                 },this);
                 break;
             case 0:
-                heart1.kill();
+                scaleKillSprite(heart1);
+                //POST SCORE TO USER HERE
                 alert('GAME OVER SCRUB');
                 location.reload();
         }
+    }
+    function scaleKillSprite(obj){
+        var killTween = game.add.tween(obj.scale);
+        killTween.to({x:game.world.width*0.5,y:game.world.heigh*0.5}, 200, Phaser.Easing.Linear.None);
+        killTween.onComplete.addOnce(function(){
+            obj.kill();
+        },this);
+        killTween.start();
     }
 </script>
 </body>
