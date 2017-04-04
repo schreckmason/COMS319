@@ -5,8 +5,10 @@
     <title>Dope Ass Game</title>
     <style>* { padding: 0; margin: 0; }</style>
     <script src="../js/phaser.min.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
+<p id="tempPar"></p>
 <script>
     /*--------------------------------------------------------  GAME SETUP  ------------------------------------------------------*/
     //This auto initializes the canvas element
@@ -33,6 +35,7 @@
     var heart3;
     //game level implementation
     var level=0;
+    var finalLevel = false;
     var lvlPass=0;
     var lvlScore=0;
     
@@ -91,79 +94,43 @@
 
     //Change this to take in parameters to construct various brick fields
     function initBricks(lvl){
-        var lvlRow;
-        var lvlCol;
-        switch(lvl){
-            case 0:
-                lvlRow = 2;
-                lvlCol = 1;
-                break;
-            case 1:
-                lvlRow = 4;
-                lvlCol = 2;
-                break;
-            case 2:
-                lvlRow = 3;
-                lvlCol = 1;
-                break;
-            case 3:
-                lvlRow = 6;
-                lvlCol = 3;
-                break;
-            case 4:
-                lvlRow = 10;
-                lvlCol = 4;
-                break;
-            case 5:
-                //movement
-                lvlRow = 5;
-                lvlCol = 2;
-        }
-        brickInfo = {
-            width: 50,
-            height: 20,
-            count: {
-                row: lvlRow,
-                col: lvlCol
-            },
-            offset: {
-                top: 50,
-                left: 60
-            },
-            padding: 10
-        };
-        placeBlocks(brickInfo.count.row, brickInfo.count.col, brickInfo.width, brickInfo.height,brickInfo.offset.top,brickInfo.offset.left,brickInfo.padding,level);
-        lvlPass = brickInfo.count.row*brickInfo.count.col;
+        $.post("./getLevel.php", {level_num: lvl}, function(response, status){
+           console.log(response);
+           var levelInfo = JSON.parse(response);
+           var blockGroups = levelInfo.blockGroups;
+           finalLevel = levelInfo.finalLevel;//boolean (Is this the final level?)
+           lvlPass = levelInfo.points;
+           bricks = game.add.group();
+           blockGroups.forEach(function(blockGroup) {
+              console.log(blockGroup);
+               placeBlocks(blockGroup, bricks);
+           });
+        });
     }
-    //Necessary, once bricks array hits a certain size the anchor location needs to change, plus will allow for movement to be incoporated
-    function placeBlocks(row,col,width,height,otop,oleft,padding,lvl){
-        bricks = game.add.group();
-        for(c=0;c<col; c++){
-            for(r=0; r<row; r++){
-                var brickX = (r*(brickInfo.width+brickInfo.padding))+brickInfo.offset.left;
-                var brickY = (c*(brickInfo.height+brickInfo.padding))+brickInfo.offset.top;
+    
+    function placeBlocks(groupDetails, blockGroup){
+        
+        for(r=0;r<groupDetails.rows; r++){
+            for(c=0; c<groupDetails.cols; c++){
+               //Set x value of block
+               var groupWidth = groupDetails.cols*groupDetails.width + (groupDetails.cols-1)*groupDetails.padding;
+               var anchor = groupDetails.hAlign.anchor; //left/right/center
+               var groupHorizontalOffset = (anchor=="left"?0:((game.world.width - groupWidth)/(anchor=="right"?1.0:2.0))) + groupDetails.hAlign.offset;
+               var brickX = groupHorizontalOffset + c * (groupDetails.width + groupDetails.padding);
+               //Set y value of block
+               var brickY = r*(groupDetails.height+groupDetails.padding) + groupDetails.vAlign.offset;
                 newBrick = game.add.sprite(brickX, brickY, 'brick');
+                newBrick.anchor.set(0);
                 game.physics.enable(newBrick, Phaser.Physics.ARCADE);
                 newBrick.body.immovable = true;
-                switch(lvl){
-                    case 0:
-                        newBrick.anchor.set(-6);
+                //Set special brick properties
+                switch(groupDetails.type){
+                    case "move1":
+                        newBrick.body.velocity.set(200,0);
+                        newBrick.body.collideWorldBounds=true;
+                        newBrick.body.bounce.set(1);
                         break;
-                    case 1:
-                    case 2:
-                        newBrick.anchor.set(-5);
-                        break;
-                    case 3:
-                        newBrick.anchor.set(-4);
-                        break;
-                    case 4:
-                        newBrick.anchor.set(0.5);
-                        break;
-                    case 5:
-                        newBrick.anchor.set(0.5);
-                        moveBrix(newBrick);
-                        break;
-                    default:     newBrick.anchor.set(0.5);
+                    default:
                         break;
                 }
                 bricks.add(newBrick);
@@ -188,12 +155,6 @@
             
         }
     }
-    //bick movement
-    function moveBrix(obj){
-        obj.body.velocity.set(200,0);
-        obj.body.collideWorldBounds=true;
-        obj.body.bounce.set(1);
-    }
     
     /*--------------------------------------------------------  COLLISION HANDLERS  ------------------------------------------------------*/
     //Called on every collision between the ball and the paddle
@@ -211,7 +172,12 @@
         
         if(lvlScore == lvlPass){
             // all bricks cleared
-            alert('Level '+level+' clear!');
+            levelCleared();
+        }
+    }
+     function levelCleared(){
+         alert('Level '+level+' clear!');
+         if(!finalLevel){
             level++;
             lvlScore = 0;//re init lvlScore for next level
             lvlPass = 0;//re init lvlPass
@@ -222,9 +188,9 @@
             game.input.onDown.addOnce(function(){
                 ball.body.velocity.set(150,-150);
             },this);
-        }
-    }
-    
+         }
+     }
+     
     //End Game LOGIC
     function ballLeaveScreen(){
         lives--;
