@@ -1,39 +1,43 @@
 {
    "defaults":
    {
-      "width": 50,
-      "height": 20,
-      "rows": 1,
-      "cols": 1,
-      "vAlign": {"offset": 50},
-      "hAlign": {"offset": 0, "anchor":"center"},
+      "width":50,
+      "height":20,
+      "rows":1,
+      "cols":1,
+      "vOffset":50,
+      "hAlign":"center",
+      "hOffset":0,
       "padding":10,
-      "type": "standard",
-      "finalLevel": false
+      "type":"standard",
+      "finalLevel":false
    },
    "levels":
    [
-      {"points": 4, "blockGroups":[{"cols": 4, "rows": 1}]},
+      {"points":4, "blockGroups":[
+         {"cols":2}]},
       
-      {"points": 8, "blockGroups":[
-         {"cols": 2, "rows": 2, "hAlign": {"offset": 100, "anchor":"left"}},
-         {"cols": 2, "rows": 2, "hAlign": {"offset": -100, "anchor":"right"}}]},
+      {"points":8, "blockGroups":[
+         {"cols":3, "rows":2, "hOffset":100, "hAlign":"left"},
+         {"cols":3, "rows":2, "hOffset":-100, "hAlign":"right"}]},
                                    
-      {"points": 18, "blockGroups":[
-         {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 50}},
-         {"cols": 3, "rows": 1, "hAlign": {"offset": 190, "anchor":"left"}, "vAlign": {"offset": 80}},
-         {"cols": 3, "rows": 1, "hAlign": {"offset": 100, "anchor":"left"}, "vAlign": {"offset": 110}},
-         {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 50}},
-         {"cols": 3, "rows": 1, "hAlign": {"offset": -190, "anchor":"right"}, "vAlign": {"offset": 80}},
-         {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 110}}]},
+      {"points":18, "blockGroups":[
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":50},
+         {"cols":3, "hOffset":190, "hAlign":"left", "vOffset":80},
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":110},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":50},
+         {"cols":3, "hOffset":-190, "hAlign":"right", "vOffset":80},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":110}]},
       
-      {"points": 10, "blockGroups":[
-         {"cols": 7, "rows": 4},
-         {"width":150, "vAlign": {"offset": 250}, "type":"barrier"}]},
+      {"points":28, "blockGroups":[
+         {"cols":7, "rows":4},
+         {"cols":3, "padding":0, "vOffset":250, "type":"barrier"}]},
       
-      {"points": 40, "blockGroups":[{"cols": 10, "rows": 4}]},
+      {"points":40, "blockGroups":[
+         {"cols":10, "rows":4},
+         {"type":"barrier", "cols":3, "padding":150, "vOffset":250}]},
       
-      {"points": 10, "finalLevel": true, "blockGroups":[
-         {"cols": 5, "rows": 2, "type": "move1"}]}
+      {"points":10, "finalLevel":true, "blockGroups":[
+         {"cols":5, "rows":2, "type":"move1"}]}
    ]
 }

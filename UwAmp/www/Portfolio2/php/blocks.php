@@ -53,6 +53,7 @@
         game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
         // game.load.image('paddle','../img/newBar.png');
         game.load.image('brick', '../img/testbrick.png');
+        game.load.image('barrier', '../img/testbarrier.png');
         game.load.image('heart', '../img/heart.png');
     }
     
@@ -104,7 +105,6 @@
            bricks = game.add.group();
            barriers = game.add.group();
            blockGroups.forEach(function(groupDetails) {
-              console.log(groupDetails);
                placeBlocks(groupDetails);
            });
         });
@@ -112,15 +112,20 @@
     
     function placeBlocks(groupDetails){
         
+         console.log(groupDetails);
         for(r=0;r<groupDetails.rows; r++){
             for(c=0; c<groupDetails.cols; c++){
                //Set x value of block
                var groupWidth = groupDetails.cols*groupDetails.width + (groupDetails.cols-1)*groupDetails.padding;
-               var anchor = groupDetails.hAlign.anchor; //left/right/center
-               var groupHorizontalOffset = (anchor=="left"?0:((game.world.width - groupWidth)/(anchor=="right"?1.0:2.0))) + groupDetails.hAlign.offset;
+               var anchor = groupDetails.hAlign; //left/right/center
+               var groupHorizontalOffset = (anchor=="left"?0:((game.world.width - groupWidth)/(anchor=="right"?1.0:2.0))) + groupDetails.hOffset;
                var brickX = groupHorizontalOffset + c * (groupDetails.width + groupDetails.padding);
+               console.log({groupWidth:groupWidth,
+                            groupHorizontalOffset:groupHorizontalOffset,
+                            gameWorldWidth:game.world.width,
+                            brickX:brickX});
                //Set y value of block
-               var brickY = r*(groupDetails.height+groupDetails.padding) + groupDetails.vAlign.offset;
+               var brickY = r*(groupDetails.height+groupDetails.padding) + groupDetails.vOffset;
                 newBrick = game.add.sprite(brickX, brickY, 'brick');
                 newBrick.anchor.set(0);
                 game.physics.enable(newBrick, Phaser.Physics.ARCADE);
@@ -135,6 +140,7 @@
                         bricks.add(newBrick);
                         break;
                     case "barrier":
+                        newBrick.loadTexture('barrier');
                         barriers.add(newBrick);
                         break;
                     default:
