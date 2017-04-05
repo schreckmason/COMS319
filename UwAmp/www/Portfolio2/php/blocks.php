@@ -35,7 +35,7 @@
     var heart2;
     var heart3;
     //game level implementation
-    var level=3;
+    var level=5;
     var finalLevel = false;
     var lvlPass=0;
     var lvlScore=0;

@@ -1,16 +1,19 @@
 {
    "defaults":
    {
-      "width":50,
-      "height":20,
-      "rows":1,
-      "cols":1,
-      "vOffset":50,
-      "hAlign":"center",
-      "hOffset":0,
-      "padding":10,
-      "type":"standard",
-      "finalLevel":false
+      "finalLevel":false,
+      "blockGroups":
+      {
+         "width":50,
+         "height":20,
+         "rows":1,
+         "cols":1,
+         "vOffset":50,
+         "hAlign":"center",
+         "hOffset":0,
+         "padding":10,
+         "type":"standard"
+      }
    },
    "levels":
    [
