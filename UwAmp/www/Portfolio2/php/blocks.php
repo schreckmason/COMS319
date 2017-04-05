@@ -49,9 +49,10 @@
         game.stage.backgroundColor = '#eee';
         
         
-        game.load.image('ball', '../img/testBall.png');//load the sprite of our game object this will be changed to make a better game project
-        game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
-        // game.load.image('paddle','../img/newBar.png');
+        //game.load.image('ball', '../img/testBall.png');//load the sprite of our game object this will be changed to make a better game project
+        game.load.image('ball','../img/newBall.png');
+        //game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
+        game.load.image('paddle','../img/newBar.png');
         game.load.image('brick', '../img/testbrick.png');
         game.load.image('barrier', '../img/testbarrier.png');
         game.load.image('heart', '../img/heart.png');
