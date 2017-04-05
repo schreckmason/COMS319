@@ -23,6 +23,7 @@
     var paddle;
     //Handle creation of brick objects
     var bricks;
+    var barriers;
     var newBrick;
     var brickInfo;
     //Score text
@@ -34,7 +35,7 @@
     var heart2;
     var heart3;
     //game level implementation
-    var level=0;
+    var level=3;
     var finalLevel = false;
     var lvlPass=0;
     var lvlScore=0;
@@ -48,9 +49,9 @@
         game.stage.backgroundColor = '#eee';
         
         
-        game.load.image('ball', '../img/newBall.png');//load the sprite of our game object this will be changed to make a better game project
-        //game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
-        game.load.image('paddle','../img/newBar.png');
+        game.load.image('ball', '../img/testBall.png');//load the sprite of our game object this will be changed to make a better game project
+        game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
+        // game.load.image('paddle','../img/newBar.png');
         game.load.image('brick', '../img/testbrick.png');
         game.load.image('heart', '../img/heart.png');
     }
@@ -101,14 +102,15 @@
            finalLevel = levelInfo.finalLevel;//boolean (Is this the final level?)
            lvlPass = levelInfo.points;
            bricks = game.add.group();
-           blockGroups.forEach(function(blockGroup) {
-              console.log(blockGroup);
-               placeBlocks(blockGroup, bricks);
+           barriers = game.add.group();
+           blockGroups.forEach(function(groupDetails) {
+              console.log(groupDetails);
+               placeBlocks(groupDetails);
            });
         });
     }
     
-    function placeBlocks(groupDetails, blockGroup){
+    function placeBlocks(groupDetails){
         
         for(r=0;r<groupDetails.rows; r++){
             for(c=0; c<groupDetails.cols; c++){
@@ -124,16 +126,21 @@
                 game.physics.enable(newBrick, Phaser.Physics.ARCADE);
                 newBrick.body.immovable = true;
                 //Set special brick properties
+                    console.log(groupDetails.type);
                 switch(groupDetails.type){
                     case "move1":
                         newBrick.body.velocity.set(200,0);
                         newBrick.body.collideWorldBounds=true;
                         newBrick.body.bounce.set(1);
+                        bricks.add(newBrick);
+                        break;
+                    case "barrier":
+                        barriers.add(newBrick);
                         break;
                     default:
+                        bricks.add(newBrick);
                         break;
                 }
-                bricks.add(newBrick);
             }
         }
     }
@@ -144,6 +151,8 @@
     function update() {
         game.physics.arcade.collide(ball, paddle, ballHitPaddle);
         game.physics.arcade.collide(ball,bricks, ballHitBrick);
+        game.physics.arcade.collide(ball,barriers);
+        // game.physics.arcade.collide(ball, barriers);
         //Note might need to eventually eliminate the possibility of having multiple keys pressed simultaneously
         if(game.input.keyboard.isDown(Phaser.Keyboard.LEFT)){
             //ball.x -= speed;
@@ -181,7 +190,11 @@
             level++;
             lvlScore = 0;//re init lvlScore for next level
             lvlPass = 0;//re init lvlPass
+            //remove any remaining bricks (shouldn't be any) and barriers
+            bricks.forEach(function(brick){if(brick.alive){brick.kill();}});
+            barriers.forEach(function(barrier){barrier.kill();});
             bricks = null;
+            barriers = null;
             initBricks(level);
             ball.reset(game.world.width*0.5, game.world.height-25);
             paddle.reset(game.world.width*0.5, game.world.height-5);
@@ -221,6 +234,7 @@
     
     //animate fade out for a given sprite (object)
     function scaleKillSprite(obj){
+       console.log("scaleKillSprite");
         var killTween = game.add.tween(obj.scale);
         killTween.to({x:game.world.width*0.5,y:game.world.heigh*0.5}, 200, Phaser.Easing.Linear.None);
         killTween.onComplete.addOnce(function(){

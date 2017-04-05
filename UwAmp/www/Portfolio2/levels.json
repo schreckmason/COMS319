@@ -27,7 +27,9 @@
          {"cols": 3, "rows": 1, "hAlign": {"offset": -190, "anchor":"right"}, "vAlign": {"offset": 80}},
          {"cols": 3, "rows": 1, "hAlign": {"offset": -100, "anchor":"right"}, "vAlign": {"offset": 110}}]},
       
-      {"points": 28, "blockGroups":[{"cols": 7, "rows": 4}]},
+      {"points": 10, "blockGroups":[
+         {"cols": 7, "rows": 4},
+         {"width":150, "vAlign": {"offset": 250}, "type":"barrier"}]},
       
       {"points": 40, "blockGroups":[{"cols": 10, "rows": 4}]},
       
