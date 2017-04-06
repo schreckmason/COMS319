@@ -20,7 +20,7 @@
       {"points":4, "blockGroups":[
          {"cols":2}]},
       
-      {"points":8, "blockGroups":[
+      {"points":12, "blockGroups":[
          {"cols":3, "rows":2, "hOffset":100, "hAlign":"left"},
          {"cols":3, "rows":2, "hOffset":-100, "hAlign":"right"}]},
                                    
@@ -41,6 +41,6 @@
          {"type":"barrier", "cols":3, "padding":150, "vOffset":250}]},
       
       {"points":10, "finalLevel":true, "blockGroups":[
-         {"cols":5, "rows":2, "type":"move1"}]}
+         {"cols":5, "rows":2, "type":"move"}]}
    ]
 }

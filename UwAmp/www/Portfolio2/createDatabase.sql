@@ -1,5 +1,5 @@
 drop table Users;
-drop table Scores;
+drop table ScoresPRs;
 
 create table Users(
    UserName VARCHAR(255),
@@ -7,9 +7,7 @@ create table Users(
    Email VARCHAR(255),
    Primary Key (UserName));
 
-create table Scores(
+create table PersonalRecords(
    Score INT(10),
    UserName VARCHAR(255),
-   DateScored DATE,
-   GameTime INT(10),
-   Primary Key (UserName, DateScored));
+   Primary Key (UserName));

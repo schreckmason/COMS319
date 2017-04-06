@@ -1,5 +1,5 @@
 <?php
-session_start();//start the session to being storing credentials and actions
+session_start();
 //Connect to DB
 $DB_USER="root";
 $DB_PASS="root";
@@ -23,7 +23,7 @@ $row=mysqli_fetch_array($result, MYSQLI_ASSOC);
 if(count($row)!=0){
     if($encryptedPass === $row["Password"]){
         //printf("%s (%s)\n", $row["UserName"], $row["Password"]);
-        $_SESSIONS["username"] = $user;//store username for the session
+        $_SESSION["username"] = $user;//store username for the session
         echo "Success";
     } else {
         //echo "The password or username entered do not match.";

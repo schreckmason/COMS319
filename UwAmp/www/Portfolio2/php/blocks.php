@@ -43,7 +43,7 @@ body {
     var heart2;
     var heart3;
     //game level implementation
-    var level=5;
+    var level=1;
     var finalLevel = false;
     var lvlPass=0;
     var lvlScore=0;
@@ -136,7 +136,7 @@ body {
                 newBrick.body.immovable = true;
                 //Set special brick properties
                 switch(groupDetails.type){
-                    case "move1":
+                    case "move":
                         newBrick.body.velocity.set(200,0);
                         newBrick.body.collideWorldBounds=true;
                         newBrick.body.bounce.set(1);
@@ -210,6 +210,9 @@ body {
             ball.reset(game.world.width*0.5, game.world.height-25);
             paddle.reset(game.world.width*0.5, game.world.height-5);
             prepareBallForShot();
+         } else {
+            alert("You cleared the final level!\nWell done!");
+            gameFinished();
          }
      }
      
@@ -231,10 +234,16 @@ body {
                 break;
             case 0:
                 scaleKillSprite(heart1);
-                //POST SCORE TO USER HERE
-                alert('GAME OVER SCRUB');
-                location.reload();
+                alert('GAME OVER!');
+                gameFinished();
         }
+    }
+    
+    function gameFinished(){
+       $.post("./saveScore.php", {score: score}, function(response, status){
+           alert(response);
+           location.reload();
+       });
     }
     
     function prepareBallForShot(){
