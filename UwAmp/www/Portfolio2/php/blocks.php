@@ -46,7 +46,7 @@ body {
    var heart2;
    var heart3;
    //game level implementation
-   var level=7;
+   var level=8;
    var finalLevel = false;
    var lvlPass=0;
    var lvlScore=0;
@@ -60,12 +60,10 @@ body {
       game.stage.backgroundColor = '#eee';
       
       
-      game.load.image('ball', '../img/testBall.png');//load the sprite of our game object this will be changed to make a better game project
-      // game.load.image('ball','../img/newBall.png');
-      // game.load.image('paddle','../img/testpaddle.png');//load the paddle, this should once again change to something cooler
-      game.load.image('paddle','../img/newBar.png');
-      game.load.image('brick', '../img/testbrick.png');
-      game.load.image('barrier', '../img/testbarrier.png');
+      game.load.image('ball','../img/isuBall.png');
+      game.load.image('paddle','../img/paddle.png');
+      game.load.image('brick', '../img/brick.png');
+      game.load.image('barrier', '../img/barrier.png');
       game.load.image('heart', '../img/heart.png');
    }
    
@@ -73,19 +71,23 @@ body {
    function create() {
       game.physics.startSystem(Phaser.Physics.ARCADE);
       ball = game.add.sprite(game.world.width*0.5, game.world.height-25, 'ball');
+      ball.scale.set(0.2,0.2);
       ball.anchor.set(0.5);
-      game.physics.enable(ball, Phaser.Physics.ARCADE);
       
-      prepareBallForShot();
+      game.physics.enable(ball, Phaser.Physics.ARCADE);
       ball.body.collideWorldBounds = true;
       ball.body.bounce.set(1);
 
       paddle = game.add.sprite(game.world.width*0.5, game.world.height-5, 'paddle');
+      
+      paddle.scale.set(0.6,0.6);
       paddle.anchor.set(0.5,1);
       game.physics.enable(paddle, Phaser.Physics.ARCADE);
       paddle.body.collideWorldBounds = true;
       paddle.body.immovable = true;
+      
       initBricks(level);
+      prepareBallForShot();
       
       //Game Over Logic
       ball.events.onOutOfBounds.add(ballLeaveScreen, this);
@@ -94,9 +96,12 @@ body {
       //Game Score
       scoreText = game.add.text(5,5, 'Points: 0',{font: '18px Arial', FILLD: '#0095DD'});
       //Life Alert
-      heart1 = game.add.sprite(game.world.width-200,0,'heart');
-      heart2 = game.add.sprite(game.world.width-200,160, 'heart');
-      heart3 = game.add.sprite(game.world.width-200, 320, 'heart');
+      heart1 = game.add.sprite(game.world.width/2.0+250,450,'heart');
+      heart2 = game.add.sprite(game.world.width/2.0,450, 'heart');
+      heart3 = game.add.sprite(game.world.width/2.0-250, 450, 'heart');
+      heart1.anchor.set(0.5);
+      heart2.anchor.set(0.5);
+      heart3.anchor.set(0.5);
       game.world.sendToBack(heart1);
       game.world.sendToBack(heart2);
       game.world.sendToBack(heart3);
@@ -123,17 +128,18 @@ body {
       });
    }
    
+   //Place a single block group
    function placeBlocks(groupDetails){
       for(r=0;r<groupDetails.rows; r++){
          for(c=0; c<groupDetails.cols; c++){
             //Set x value of block
-            var groupWidth = groupDetails.cols*groupDetails.width + (groupDetails.cols-1)*groupDetails.padding;
+            var groupWidth = groupDetails.cols*groupDetails.width + (groupDetails.cols-1)*groupDetails.hPadding;
             var anchor = groupDetails.hAlign; //left/right/center
             var groupHorizontalOffset = (anchor=="left"?0:((game.world.width - groupWidth)/(anchor=="right"?1.0:2.0))) + groupDetails.hOffset;
-            var brickX = groupHorizontalOffset + c * (groupDetails.width + groupDetails.padding);
+            var brickX = groupHorizontalOffset + c * (groupDetails.width + groupDetails.hPadding);
             //Set y value of block
-            var brickY = r*(groupDetails.height+groupDetails.padding) + groupDetails.vOffset;
-            newBrick = game.add.sprite(brickX, brickY, 'brick');
+            var brickY = r*(groupDetails.height+groupDetails.vPadding) + groupDetails.vOffset;
+            var newBrick = game.add.sprite(brickX, brickY, 'brick');
             newBrick.anchor.set(0);
             game.physics.enable(newBrick, Phaser.Physics.ARCADE);
             newBrick.body.immovable = true;
@@ -152,7 +158,7 @@ body {
                   bricks.add(newBrick);
                   break;
                case "barrier":
-                  newBrick.loadTexture('barrier');
+                  newBrick.loadTexture('barrier');//overwrite texture
                   barriers.add(newBrick);
                   break;
                default:
@@ -215,6 +221,7 @@ body {
          }
       }
    }
+   
    function levelCleared(){
       alert('Level '+level+' clear!');
       if(!finalLevel){
@@ -227,10 +234,8 @@ body {
          bricks = null;
          barriers = null;
          initBricks(level);
-         ball.reset(game.world.width*0.5, game.world.height-25);
-         paddle.reset(game.world.width*0.5, game.world.height-5);
          // Increase game speed each level
-         gameSpeed *= 1.1;
+         gameSpeed *= 1.085;
          prepareBallForShot();
       } else {
          alert("You cleared the final level!\nWell done!");
@@ -244,14 +249,10 @@ body {
       switch(lives){
          case 2:
             scaleKillSprite(heart3);
-            ball.reset(game.world.width*0.5, game.world.height-25);
-            paddle.reset(game.world.width*0.5, game.world.height-5);
             prepareBallForShot();
             break;
          case 1:
             scaleKillSprite(heart2);
-            ball.reset(game.world.width*0.5, game.world.height-25);
-            paddle.reset(game.world.width*0.5, game.world.height-5);
             prepareBallForShot();
             break;
          case 0:
@@ -269,6 +270,8 @@ body {
    }
    
    function prepareBallForShot(){
+      ball.reset(game.world.width*0.5, game.world.height-25);
+      paddle.reset(game.world.width*0.5, game.world.height-5);
       lastBallVelocity = undefined;
       stickyBall=true;
       game.input.onDown.addOnce(function(){
@@ -283,7 +286,6 @@ body {
       var yDiff = game.input.y - ball.y;
       var scalar = speed/Math.sqrt(xDiff*xDiff+yDiff*yDiff);
       ball.body.velocity.set(xDiff*scalar, yDiff*scalar);
-      console.log("Starting   -> " + ball.body.velocity.getMagnitude());
    }
    //animate fade out for a given sprite (object)
    function scaleKillSprite(obj){

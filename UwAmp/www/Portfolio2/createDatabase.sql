@@ -1,6 +1,3 @@
-drop table Users;
-drop table ScoresPRs;
-
 create table Users(
    UserName VARCHAR(255),
    Password VARCHAR(255),
