@@ -1,0 +1,89 @@
+//xml parse
+lexer grammar XMLParser;
+
+fragment TAGSTART: '<';
+fragment SOFTSTOP: '>';
+fragment HARDSTOP: '</';
+
+fragment OKCHAR1: [A-WYZa-wyz];
+fragment OKCHAR2: OKCHAR1 [A-LN-Za-ln-z] | [A-Za-z];
+fragment OKCHAR3: OKCHAR1 OKCHAR2 [A-KM-Za-km-z] | [A-Za-z];
+
+fragment ACCEPTABLE: OKCHAR1+ OKCHAR2+ OKCHAR3+;
+
+VALID: ('_' ACCEPTABLE) | ACCEPTABLE;
+
+ELEMENT: TAGSTART VALID* SOFTSTOP
+        {System.out.println("Beginning tag: "+getText());};
+
+ENDELEMENT: HARDSTOP VALID*  SOFTSTOP
+        {System.out.println("End-tag: "+getText());} ;
+
+
+/**********************************/
+/*              EMAIL             */
+/**********************************/
+fragment LOCALEMAILCHAR: [A-Za-z0-9-._~!$&'()*+,;=:].?;  //acceptable email components
+fragment DOMAINCHAR: [A-Za-z0-9-.];//acceptable domain components
+fragment BUILDEMAIL: LOCALEMAILCHAR+ '@' DOMAINCHAR+ ;
+
+EMAIL: ELEMENT BUILDEMAIL ENDELEMENT {System.out.println("email address: "+getText());};
+//EMAIL: BUILDEMAIL {System.out.println("email address: "+getText());};//<-- was for debugging
+
+
+/*********************************/
+/*             DATE              */
+/*********************************/
+fragment SLASH: '/';
+fragment DAY1: [0-2]|'3';
+fragment DAY2: DAY1 [0-9] | [0-1];
+fragment MONTH1: [0-1];
+fragment MONTH2: [0-2];
+fragment YEAR1: '2';
+fragment YEAR2: [0-1];
+fragment YEAR34: [0-9];
+fragment BUILDDATE: DAY1 DAY2 SLASH MONTH1 MONTH2 SLASH YEAR1 YEAR2 YEAR34 YEAR34;
+
+DATE: ELEMENT BUILDDATE ENDELEMENT {System.out.println("date is: "+getText());};
+
+/*********************************/
+/*             PHONE             */
+/*********************************/
+fragment DIGIT: [0-9];
+fragment SPEC: [()-. ];
+
+//Form 1: ###-###-####
+//Form 2: (###) ###-####
+//Form 3: ### ### ####
+//Form 4: ###.###.####
+
+fragment BUILDPHONE: SPEC* DIGIT DIGIT DIGIT SPEC+ DIGIT DIGIT DIGIT SPEC+ DIGIT DIGIT DIGIT DIGIT;
+
+PHONE: ELEMENT BUILDPHONE ENDELEMENT {System.out.println("phone number: "+getText());};
+
+/*********************************/
+/*          CREDIT CARD          */
+/*********************************/
+//USE DIGIT
+fragment VISA: '4' (DIGIT)+;
+fragment MASTERCARD: [5][1-5] (DIGIT)+;
+fragment DINERS: [3][0][0-5] (DIGIT)+ | [3][6] (DIGIT)+ | [3][8] (DIGIT)+ | MASTERCARD;
+fragment DISCOVER: [6][0][1][1] (DIGIT)+ | [6][5] (DIGIT)+;
+fragment JCB: [2][1][3][1] (DIGIT)+ | [1][8][0][0] (DIGIT)+ | [3][5] (DIGIT)+;
+
+CC: ELEMENT (VISA|MASTERCARD|DINERS|DISCOVER|JCB) ENDELEMENT {System.out.println("cc number: "+getText());};
+//CARDNUM: ELEMENT [0-9]+ ENDELEMENT { System.out.println("CC Number is :"+getText());};
+
+
+/*********************************/
+/*             ADDRESS           */
+/*********************************/
+fragment ALPHA: [A-Za-z];
+fragment CHARS: [-_~!$&'()*+,;=: ];
+
+ADDRESS: ELEMENT (DIGIT|ALPHA|CHARS)+ ENDELEMENT {System.out.println("Addres is: "+getText());};
+
+
+WS: [\r\t\n]
+        {System.out.println("Whitespace found");skip();};
+
