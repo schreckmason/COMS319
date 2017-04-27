@@ -1,0 +1,4 @@
+Mason worked primarily on XMLParser.
+Drake worked primarily on JSONParser.
+Mason did initial work on matching specific data fields (email, date, address, creditcard, custom)
+Drake fixed up some problems with those tokens and added error handling.
