@@ -1,0 +1,1 @@
+I believe every distinct 'AI' personality can be it's own JSON file, so that if we choose to let the player select which types of AI they are going to play against we can just call the files distinctly. Or this could be handled by one JSON file just containing an array of the different personalities however I like the idea of multiple concise files.

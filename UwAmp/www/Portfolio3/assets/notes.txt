@@ -1,0 +1,1 @@
+This file should contain all of the images used to draw tanks, enemies and backgrounds. Also can house spritesheets for animations.

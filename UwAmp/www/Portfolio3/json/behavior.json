@@ -1,0 +1,11 @@
+{
+"behavior":
+[
+	{
+		"hp":3,
+		"rateOfFire":1000,
+		"name":"Rogue One",
+		"speed":4
+	}
+]
+}
