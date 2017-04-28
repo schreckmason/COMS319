@@ -11,21 +11,19 @@
 /*****************************************/
 Enemy = function(id, game, target, bullets, behavior){
 	//post to behavior.json for hp, fire rate, and name, and movement behavior 
-	var that = this;
-	$.post('./GetBehavior.php',{behaviorId: behavior}, function(response){
-			console.log(response);
-			var behaviorInfo = JSON.parse(response);
-			that.hp = behaviorInfo.hp;
-			that.rateOfFire = behaviorInfo.rateOfFire;
-			that.name = behaviorInfo.name;
-			that.speed = behaviorInfo.speed;
-			});
-
-	this.id = id;
 	this.game = game;
 	this.bullets = bullets;
 	this.reload = 0;
 	this.target = target;
+	this.alive = true;
+
+	this.behavior = 0;
+
+	//REPLACE ME AFTER WE FIGURE OUT THE POST TIMING TO BE DYNAMIC CHARACTERISTICS
+	this.hp = 5;
+	this.rateOfFire = 1000;
+	this.name = "Rogue One";
+	this.speed = 2;
 
 	var x = game.world.randomX;
 	var y = game.world.randomY;
@@ -35,6 +33,7 @@ Enemy = function(id, game, target, bullets, behavior){
 	this.cannon.anchor.set(0.3,0.5);
 
 	game.physics.enable(this.tank, Phaser.Physics.ARCADE);
+	this.tank.id = id; 
 	this.tank.body.immovable = false;
 	this.tank.body.collideWorldBounds = true;
 
@@ -45,16 +44,17 @@ Enemy = function(id, game, target, bullets, behavior){
 
 //PROTOTYPE UPDATE
 Enemy.prototype.update = function(){
-this.tank.cannon.x = this.tank.x;
-this.tank.cannon.y = this.tank.y
-this.cannon.rotation = this.game.physics.arcade.angleBetween(this.tank, this.target);
+	this.cannon.x = this.tank.x;
+	this.cannon.y = this.tank.y
+	this.cannon.rotation = this.game.physics.arcade.angleBetween(this.tank, this.target);
+	
 
 };
 
 //PROTOTYPE DAMAGE
 Enemy.prototype.damage = function(){
-	this.health -= 1;
-	if(this.health<=0){
+	this.hp -= 1;
+	if(this.hp<=0){
 		this.cannon.kill();
 		this.tank.kill();
 		return true;
@@ -152,7 +152,7 @@ function create(){
 
 	//INIT HOSTILES
 	hostiles = [];
-	totalHostiles = 1;
+	totalHostiles = 2;
 	for(var i=0;i<totalHostiles;i++){
 		hostiles.push(new Enemy(i, game, tank, hostileBullets,0));
 		game.physics.enable(hostiles[i].tank, Phaser.Physics.ARCADE);
@@ -164,6 +164,8 @@ function create(){
 	game.camera.follow(tank);
 	game.camera.focusOnXY(0, 0);
 
+	console.log(hostiles);
+	console.log(hostiles[0].tank.id);
 }
 //Update: executed at every frame (handle player and AI movement)
 function update(){
@@ -184,37 +186,33 @@ function update(){
 		shoot();
 	}
 
-	//M to display the map of the game?
 
-	//E to display the enemies left in the game
+	for(var i = 0; i<hostiles.length;i++){
+		if(hostiles[i].alive){ liveHostiles++;
+			game.physics.arcade.collide(tank, hostiles[i].tank);
+			game.physics.arcade.overlap(bullets, hostiles[i].tank, enemyShot, null, this);
+		}
+		if(game.input.keyboard.isDown(Phaser.Keyboard.O)){hostiles[i].tank.x-=tankSpeed;}
+		else if(game.input.keyboard.isDown(Phaser.Keyboard.P)){hostiles[i].tank.x+=tankSpeed;}
+		hostiles[i].update();
+	}
+}
 
-/*
-for(var i=0;i<hostiles.length;i++){
-if(hostiles[i].alive){
-liveHostiles++;
-game.physics.arcade.overlap(bullets, hostiles[i].tank, enemyShot, null, this);
-console.log("enemies alive");
-}
-}
-*/
-//REMOVE ME and make dynamic
-if(game.input.keyboard.isDown(Phaser.Keyboard.O)){hostiles[0].tank.x-= tankSpeed; }
-else if(game.input.keyboard.isDown(Phaser.Keyboard.P)){hostiles[0].tank.x+=tankSpeed; }
-game.physics.arcade.overlap(bullets, hostiles[0].tank, enemyShot, null, this);
-}
 
 //Player is hit
 function playerShot(tank, bullet){
 	bullet.kill();
-
 }
 
 //Enemy is hit
-function enemyShot(bullets, hostile){
-//change me to ecrement bot's hp
-bullets.kill();
-hostile.kill();
-//need to kill cannon
+function enemyShot(hostile, bullet){
+	bullet.kill();
+	var fatality = hostiles[hostile.id].damage();
+	if(fatality){
+		console.log("kill");
+	}else{
+		console.log("decrement hp");
+	}
 }
 
 
@@ -229,9 +227,9 @@ function shoot(){
 	}
 }
 
-//Radar
-function utilities(){
 
+function utilities(){
+//Game status text such as number of enemies, player hp, and whatever
 }
 
 </script>
