@@ -1,0 +1,13 @@
+Drake:
+ - AI logic
+ - movement extrapolation
+ - avoidance calculations
+ - code decoupling
+ - helper functions
+
+Mason:
+ - game initialization
+ - project architecture
+ - initial sprite and game world programming
+ - initial game logic and play (code later changed to be more modular)
+ - graphics

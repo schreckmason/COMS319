@@ -1,0 +1,74 @@
+{
+   "defaults":
+   {
+      "finalLevel":false,
+      "blockGroups":
+      {
+         "width":50,
+         "height":20,
+         "rows":1,
+         "cols":1,
+         "vOffset":50,
+         "hAlign":"center",
+         "hOffset":0,
+         "hPadding":10,
+         "vPadding":10,
+         "type":"standard"
+      }
+   },
+   "levels":
+   [
+      {"points":4, "blockGroups":[
+         {"cols":2}]},
+      
+      {"points":12, "blockGroups":[
+         {"cols":3, "rows":2, "hOffset":100, "hAlign":"left"},
+         {"cols":3, "rows":2, "hOffset":-100, "hAlign":"right"}]},
+                                   
+      {"points":18, "blockGroups":[
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":50},
+         {"cols":3, "hOffset":190, "hAlign":"left", "vOffset":80},
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":110},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":50},
+         {"cols":3, "hOffset":-190, "hAlign":"right", "vOffset":80},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":110}]},
+      
+      {"points":28, "blockGroups":[
+         {"cols":7, "rows":4},
+         {"cols":3, "hPadding":0, "vOffset":250, "type":"barrier"}]},
+      
+      {"points":38, "blockGroups":[
+         {"cols":10, "vOffset":50},
+         {"cols":4, "vOffset":80, "hPadding":130},
+         {"cols":10, "vOffset":110},
+         {"cols":4, "vOffset":140, "hPadding":130},
+         {"cols":10, "vOffset":170},
+         {"type":"barrier", "cols":3, "hPadding":130, "vOffset":250}]},
+      
+      {"points":10, "blockGroups":[
+         {"cols":5, "rows":2, "type":"moveRight"}]},
+      
+      {"points":18, "blockGroups":[
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":50, "type":"moveRight"},
+         {"cols":3, "hOffset":190, "hAlign":"left", "vOffset":80, "type":"moveRight"},
+         {"cols":3, "hOffset":100, "hAlign":"left", "vOffset":110, "type":"moveRight"},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":140, "type":"moveLeft"},
+         {"cols":3, "hOffset":-190, "hAlign":"right", "vOffset":170, "type":"moveLeft"},
+         {"cols":3, "hOffset":-100, "hAlign":"right", "vOffset":200, "type":"moveLeft"}]},
+      
+      {"points":16, "blockGroups":[
+         {"cols":4, "hPadding":70, "hOffset":-50, "hAlign":"right", "vOffset":50, "type":"moveRight"},
+         {"cols":4, "hPadding":70, "hOffset":110, "hAlign":"left", "vOffset":80, "type":"moveLeft"},
+         {"cols":4, "hPadding":70, "hOffset":-110, "hAlign":"right", "vOffset":110, "type":"moveRight"},
+         {"cols":4, "hPadding":70, "hOffset":50, "hAlign":"left", "vOffset":140, "type":"moveLeft"},
+         {"cols":3, "hPadding":130, "vOffset":250, "type":"barrier"}]},
+      
+      {"points":32, "finalLevel":true, "blockGroups":[
+         {"cols":6, "rows":4, "vPadding":40, "hPadding":70, "vOffset":50},
+         {"cols":6, "hPadding":70, "vOffset":290, "type":"barrier"},
+         {"cols":2, "hPadding":300, "hOffset":-210, "vOffset":80, "type":"moveRight"},
+         {"cols":2, "hPadding":300, "hOffset":-70, "vOffset":140, "type":"moveRight"},
+         {"cols":2, "hPadding":300, "hOffset":70, "vOffset":200, "type":"moveRight"},
+         {"cols":2, "hPadding":300, "hOffset":210, "vOffset":260, "type":"moveRight"}]}
+   ]
+}
