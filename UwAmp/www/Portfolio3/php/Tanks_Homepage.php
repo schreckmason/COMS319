@@ -13,6 +13,7 @@
 <!--PRIMARY-->
 <!--Button for control display, button to begin playing-->
 <p><input type="button" id="playButton" value="Play!"></p> 
+<p><input type="button" id="playBrickBreaker" value="Brick Breaker"></p>
 
 <!--SECONDAY-->
 <!--Leaderboard, personal best, select bot AI-->
@@ -24,6 +25,11 @@ $(document).ready(function(){
 		//Redirect to game screen (will change if we implement login, must validate login prior to redirection)
 		window.location.href = './Game.php';
 	});
+
+	$('#playBrickBreaker').click(function(){
+		window.location.href = '../Bricks/php/blocks.php';
+	});
+
 });
 </script>
 </body>

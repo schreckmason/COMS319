@@ -1,236 +1,173 @@
 <html>
 <head>
-<!--Necessary scripts-->
 <script src="../js/phaser.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 </head>
 <body>
+<script src="../js/HelperFunctions.js" ></script>
+<script src="../js/HostileAI/TestHostile.js" ></script>
+<script src="../js/HostileAI/StrangeHostile.js" ></script>
+<script src="../js/HostileAI/AvoidantHostile.js" ></script>
+<script src="../js/PlayerTank.js" ></script>
+<script src="../js/Tank.js" ></script>
 <script>
 /*****************************************/
-/*           HELPER FUNCTIONS            */
+/*           GLOBAL GAME VARS            */
 /*****************************************/
-Enemy = function(id, game, target, bullets, behavior){
-	//post to behavior.json for hp, fire rate, and name, and movement behavior 
-	this.game = game;
-	this.bullets = bullets;
-	this.reload = 0;
-	this.target = target;
-	this.alive = true;
-
-	this.behavior = 0;
-
-	//REPLACE ME AFTER WE FIGURE OUT THE POST TIMING TO BE DYNAMIC CHARACTERISTICS
-	this.hp = 5;
-	this.rateOfFire = 1000;
-	this.name = "Rogue One";
-	this.speed = 2;
-
-	var x = game.world.randomX;
-	var y = game.world.randomY;
-	this.tank = game.add.sprite(x,y,'hostile');
-	this.cannon = game.add.sprite(x,y,'hostileCannon');
-	this.tank.anchor.set(0.5);
-	this.cannon.anchor.set(0.3,0.5);
-
-	game.physics.enable(this.tank, Phaser.Physics.ARCADE);
-	this.tank.id = id; 
-	this.tank.body.immovable = false;
-	this.tank.body.collideWorldBounds = true;
-
-	console.log(this);
-
-
-};
-
-//PROTOTYPE UPDATE
-Enemy.prototype.update = function(){
-	this.cannon.x = this.tank.x;
-	this.cannon.y = this.tank.y
-	this.cannon.rotation = this.game.physics.arcade.angleBetween(this.tank, this.target);
-	
-
-};
-
-//PROTOTYPE DAMAGE
-Enemy.prototype.damage = function(){
-	this.hp -= 1;
-	if(this.hp<=0){
-		this.cannon.kill();
-		this.tank.kill();
-		return true;
-	}
-	return false;
-};
-
-
+//      -----minimize global variables----
+var game;
+var background; //type of terrain
+var playerTank;
+var hostiles; //sprite group of hostiles
+var allBullets; //array of all bullets
+var allTanks; //array of all tanks
+var hostileAIs = //init functions, update functions, and properties for each AI
 
 /*****************************************/
 /*               GAME INIT               */
 /*****************************************/
-var game = new Phaser.Game(800,500,Phaser.AUTO,null,{
+game = new Phaser.Game(800,500,Phaser.AUTO,null,{
 preload: preload, create: create, update: update
 });
 
 //Preload assets
 function preload(){
-	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-	game.scale.pageAlignHorizontally = true;
-	game.scale.pageAlignVertically = true;
+   
+   //SETS THE TERRAIN FROM THE ASSETS FOLDER
+   game.load.image('terrain', '../assets/light_grass.png');
 
-	//SETS THE TERRAIN FROM THE ASSETS FOLDER
-	game.load.image('terrain', '../assets/light_grass.png');
+   //game.load.atlas will need to be used to add a tank texture later
+   //REPLACE ME WITH CUSTOM TANK
+   //name image keys as: "<style>_tank" and "<style>_cannon"
+   game.load.image('player_tank','../assets/tank1.png');
+   game.load.image('player_cannon','../assets/cannon1.png');
+   game.load.image('hostile_tank','../assets/tank2.png');
+   game.load.image('hostile_cannon','../assets/tank2cannon.png');
+   //REPLACE ME WITH CUSTOM BULLET
+   game.load.image('bullet','../assets/bullet.png');
+}
 
-	//game.load.atlas will need to be used to add a tank texture later
-	//REPLACE ME WITH CUSTOM TANK
-	game.load.image('tank','../assets/tank1.png');
-	game.load.image('cannon','../assets/cannon1.png');
-	game.load.image('hostile','../assets/tank2.png');
-	game.load.image('hostileCannon','../assets/tank2cannon.png');
-	//REPLACE ME WITH CUSTOM BULLET
-	game.load.image('bullet','../assets/bullet.png');
-
-
+/*****************************************/
+/*             AI DEFINITIONS            */
+/*****************************************/
+function createHostilesAIs(){
+   hostileAIs = {
+      test: [
+         testHostile.init, 
+         testHostile.update, 
+         {
+            style:"hostile",
+            health:5,
+            xPos:"random",
+            yPos:"random",
+            reloadDelay:2000
+         }
+      ],
+      avoidant: [
+         avoidantHostile.init, 
+         avoidantHostile.update, 
+         {
+            driveSpeed:2,
+            health:10,
+            reloadDelay: 500
+         }
+      ],
+      strange: [
+         strangeHostile.init, 
+         strangeHostile.update, 
+         {
+            style:"hostile",
+            health:3,
+            xPos:"random",
+            yPos:"random",
+            reloadDelay:2000
+         }
+      ]
+   };
 }
 /*****************************************/
-/*           GLOBAL GAME VARS            */
+/*              GAME CREATE              */
 /*****************************************/
-var totalTanks = 0;//array containing enemies
-//This will be the type of terrain
-var background;
-//Player's Tank
-var tank;
-//Tank Components
-var cannon;
-var bullets;
-var tankSpeed=2;
-var fireRate=100;
-var reload=0;
-//Enemies
-var hostileBullets;//bullets shot by hostiles
-var totalHostiles;//total number of hostiles 
-var liveHostiles;//number of live hostiles
-
 //Create loaded elements
 function create(){
-	//INITIALIZE THE BACKGROUND
-	background = game.add.tileSprite(0,0,800,500,'terrain');
-	background.fixedToCamera = true;
+   //INITIALIZE THE BACKGROUND
+   background = game.add.tileSprite(0,0,800,500,'terrain');
+   background.fixedToCamera = true;
+   
+   //filled as tanks are created
+   allTanks = []
+   allBullets = [];
+   
+   //CREATE PLAYER TANK
+   playerTank = createTank(function(){}, playerTankUpdate, {style:"player", health:10, reloadDelay: 1000});
+   playerTank.bringToTop();
+   
+   //INIT AIs
+   createHostilesAIs();
+   
+   //INIT HOSTILES
+   hostiles = game.add.group();
+   for(var i=0;i<1;i++){
+      var enemyTank = createTank.apply(this, hostileAIs["avoidant"]);
+      hostiles.add(enemyTank);//add hostile sprite to sprite group
+   }
+   game.world.bringToTop(hostiles);
 
-	//INITIALIZE THE BASE OF THE 'TANK'
-	tank = game.add.sprite(0,0,'tank');
-	tank.anchor.setTo(0.5, 0.5);
-	game.physics.enable(tank, Phaser.Physics.ARCADE);
-	tank.body.drag.set(0.2);
-	tank.body.collideWorldBounds = true;
-	tank.body.maxVelocity.setTo(200,200);
-	tank.hp = 10;
-	tank.alive = true;
-
-	//INITIALIZE THE CANNON OF THE 'TANK
-	cannon = game.add.sprite(0,0,'cannon','tank');
-	cannon.anchor.setTo(0.3,0.5);
-
-	//BULLETS OF THE PLAYER'S TANK
-	bullets = game.add.group();
-	bullets.enableBody = true;
-	bullets.physicsBodyType = Phaser.Physics.ARCADE;
-	bullets.createMultiple(30, 'bullet', 0, false);
-	bullets.setAll('anchor.x', 0.5);
-	bullets.setAll('anchor.y', 0.5);
-	bullets.setAll('outOfBoundsKill', true);
-	bullets.setAll('checkWorldBounds', true);
-
-	//ENEMY BULLET GROUP
-	hostileBullets = game.add.group();
-	hostileBullets.enableBody = true;
-	hostileBullets.physicsBodyType = Phaser.Physics.ARCADE;
-	hostileBullets.createMultiple(100, 'bullet');
-	hostileBullets.setAll('anchor.x', 0.5);
-	hostileBullets.setAll('anchor.y', 0.5);
-	hostileBullets.setAll('outOfBoundsKill', true);
-	hostileBullets.setAll('checkWorldBounds', true);
-
-	//INIT HOSTILES
-	hostiles = [];
-	totalHostiles = 2;
-	for(var i=0;i<totalHostiles;i++){
-		hostiles.push(new Enemy(i, game, tank, hostileBullets,0));
-		game.physics.enable(hostiles[i].tank, Phaser.Physics.ARCADE);
-	}
-	//BRING ALL OBJECTS TO TOP
-	tank.bringToTop();
-	cannon.bringToTop();
-
-	game.camera.follow(tank);
-	game.camera.focusOnXY(0, 0);
-
-	console.log(hostiles);
-	console.log(hostiles[0].tank.id);
+   //SET CAMERA
+   game.camera.follow(playerTank);
+   // game.camera.focusOnXY(0, 0);
+   
 }
+/*****************************************/
+/*                 UPDATE                */
+/*****************************************/
 //Update: executed at every frame (handle player and AI movement)
 function update(){
-	if(game.input.keyboard.isDown(Phaser.Keyboard.A)){ tank.x -= tankSpeed; }
-	else if(game.input.keyboard.isDown(Phaser.Keyboard.D)){ tank.x += tankSpeed; }
-	else if(game.input.keyboard.isDown(Phaser.Keyboard.S)){ tank.y += tankSpeed; }
-	else if(game.input.keyboard.isDown(Phaser.Keyboard.W)){ tank.y -= tankSpeed; }
-	//FINISH THE MOVEMENTS
-
-
-	cannon.x = tank.x;
-	cannon.y = tank.y;
-	//TACK POINTER FOR CANNON
-	cannon.rotation = game.physics.arcade.angleToPointer(cannon);
-
-	//POINTER CLICK
-	if(game.input.activePointer.isDown){
-		shoot();
-	}
-
-
-	for(var i = 0; i<hostiles.length;i++){
-		if(hostiles[i].alive){ liveHostiles++;
-			game.physics.arcade.collide(tank, hostiles[i].tank);
-			game.physics.arcade.overlap(bullets, hostiles[i].tank, enemyShot, null, this);
-		}
-		if(game.input.keyboard.isDown(Phaser.Keyboard.O)){hostiles[i].tank.x-=tankSpeed;}
-		else if(game.input.keyboard.isDown(Phaser.Keyboard.P)){hostiles[i].tank.x+=tankSpeed;}
-		hostiles[i].update();
-	}
+   //update method off all sprites that have been added to the game called automatically
+   // game.physics.arcade.collide(playerTank, hostiles);//NOT WORKING
+   game.physics.arcade.overlap(hostiles, allBullets, hostileHit, null, this);
+   game.physics.arcade.overlap(playerTank, allBullets, playerHit, null, this);
+   
+   // console.log(findClosestBullet());
 }
 
+// findClosestBullet = function(){
+   // var closestBullet = undefined;
+   // var minDistance = undefined;
+   // allBullets.forEach(function(bullet) {
+      // if(bullet.alive){
+         // var dist = game.physics.arcade.distanceBetween(bullet, playerTank);
+         // console.log(dist);
+         // if(minDistance===undefined || dist<minDistance){
+            // minDistance = dist;
+            // closestBullet = bullet;
+         // }
+      // }
+   // });
+   // // console.log(minDistance);
+   // return closestBullet;
+// };
 
 //Player is hit
-function playerShot(tank, bullet){
-	bullet.kill();
+function playerHit(tank, bullet){
+   if(tank.leavingChamber.indexOf(bullet) == -1){
+      playerTank.damage(1);
+      //if the bullet is one which is not leaving this tank's chamber
+      bullet.kill();//bullet disappears
+   }
 }
 
 //Enemy is hit
-function enemyShot(hostile, bullet){
-	bullet.kill();
-	var fatality = hostiles[hostile.id].damage();
-	if(fatality){
-		console.log("kill");
-	}else{
-		console.log("decrement hp");
-	}
+function hostileHit(bullet, hostile){
+   if(hostile.leavingChamber.indexOf(bullet) == -1){
+      //if the bullet isn't currently leaving this tank's chamber
+      hostile.damage(1);//remove 1 hp from hostile
+      bullet.kill();//bullet disappears
+   }
 }
 
-
-//Shoot
-function shoot(){
-	if (game.time.now > reload && bullets.countDead() > 0)
-	{
-		reload = game.time.now + fireRate;
-		var bullet = bullets.getFirstExists(false);
-		bullet.reset(cannon.x, cannon.y);
-		bullet.rotation = game.physics.arcade.moveToPointer(bullet, 1000, game.input.activePointer, 500);
-	}
-}
-
-
-function utilities(){
 //Game status text such as number of enemies, player hp, and whatever
-}
+// function utilities(){}
 
 </script>
 </body>

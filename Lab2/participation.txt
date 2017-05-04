@@ -1,0 +1,14 @@
+Mason:
+- validation1.html design and format
+- validation1.js functionality
+- validation2.html design and format
+- validation2.js functionality 
+- track.html
+
+
+Drake:
+- formalizing of validation1.js (tidied up code, made more efficient)
+- formalizing of validation2.js (tidied up code, made more efficient)
+- snake.html 
+- snake.js
+- performed requirements check
